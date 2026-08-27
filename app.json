@@ -1,14 +1,31 @@
 {
   "expo": {
-    "name": "Justdown-tmp",
-    "slug": "Justdown-tmp",
+    "name": "Justdown",
+    "slug": "justdown",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hyungwonlabs.justdown",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#151515"
+          }
+        }
+      ]
+    ],
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -20,6 +37,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "517d365b-d52b-435c-8824-8cc790a75ad1"
+      }
+    },
+    "owner": "hyungwon12"
   }
 }
