@@ -11,6 +11,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { deleteNote as deleteNoteInStorage, loadNotes, noteTitle, type Note } from './storage';
+import { cleanHeadingText } from './markdown';
 import { useTheme } from './theme';
 import type { RootStackParamList } from './navigation';
 
@@ -23,7 +24,8 @@ function preview(content: string): string {
     .replace(/[#>*`\-\[\]{}|]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
-  return rest.slice(0, 80);
+  // 후리가나 요미(《…》)는 목록에서 숨긴다 (목차와 동일한 규칙)
+  return cleanHeadingText(rest).slice(0, 80);
 }
 
 export default function NoteListScreen({ navigation }: Props) {
@@ -101,7 +103,7 @@ export default function NoteListScreen({ navigation }: Props) {
           </Text>
         }
         renderItem={({ item }) => {
-          const title = noteTitle(item.content) || '(제목 없음)';
+          const title = cleanHeadingText(noteTitle(item.content)) || '(제목 없음)';
           const sub = preview(item.content);
           return (
             <Swipeable

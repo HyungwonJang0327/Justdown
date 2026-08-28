@@ -117,8 +117,8 @@ export function extractHeadings(markdown: string): Heading[] {
   return out;
 }
 
-/** 목차 표시용으로 인라인 마크업을 제거한다. */
-function cleanHeadingText(s: string): string {
+/** 목차·노트 목록 표시용으로 후리가나 요미와 인라인 마크업을 제거한다. */
+export function cleanHeadingText(s: string): string {
   return s
     .replace(/《[^《》]*》/g, '') // 후리가나 요미 제거 (베이스만 남김)
     .replace(/[｜|]/g, '')
