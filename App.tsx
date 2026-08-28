@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -47,8 +48,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <ThemeContext.Provider value={themeValue}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeContext.Provider value={themeValue}>
         <NavigationContainer theme={navTheme}>
           <Stack.Navigator>
             <Stack.Screen
@@ -63,8 +65,9 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      </ThemeContext.Provider>
-    </SafeAreaProvider>
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        </ThemeContext.Provider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

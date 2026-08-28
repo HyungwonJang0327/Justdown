@@ -37,7 +37,8 @@ export default function NoteEditScreen({ route, navigation }: Props) {
   const { colors, theme } = useTheme();
 
   const [content, setContent] = useState('');
-  const [tab, setTab] = useState<Tab>('code');
+  // 신규 노트는 바로 작성(Code), 기존 노트는 읽기(Preview)부터
+  const [tab, setTab] = useState<Tab>(isNew ? 'code' : 'preview');
   const [loaded, setLoaded] = useState(isNew);
   const existedRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
