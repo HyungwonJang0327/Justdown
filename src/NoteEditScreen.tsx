@@ -281,10 +281,11 @@ export default function NoteEditScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       )}
-      {/* TextInput은 탭 전환 시 언마운트하지 않고 숨김만 한다.
-          재마운트되면 키보드 액세서리(툴바) 연결이 끊기기 때문. */}
-      {loaded && (
-        <TextInput
+      {/* TextInput은 InputAccessoryView(툴바)와 같은 첫 렌더 커밋에 마운트되어야
+          액세서리 연결이 생긴다 (늦게 마운트하면 내용 로드가 느린 노트에서 연결 실패).
+          그래서 로드 완료를 기다리지 않고 빈 값으로 즉시 마운트하고, 내용은 나중에 채운다.
+          탭 전환 시에도 언마운트하지 않고 숨김만 한다 (재마운트 시 연결이 끊김). */}
+      <TextInput
           ref={inputRef}
           style={[styles.input, { color: colors.text }, tab !== 'code' && styles.hidden]}
           value={content}
@@ -304,7 +305,6 @@ export default function NoteEditScreen({ route, navigation }: Props) {
           autoFocus={isNew}
           keyboardAppearance={theme === 'dark' ? 'dark' : 'light'}
         />
-      )}
       {loaded && tab === 'preview' && (
         <WebView
           ref={webviewRef}
@@ -401,7 +401,8 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
-  hidden: { display: 'none' },
+  // display:'none'이 아닌 0-크기 숨김: 네이티브 뷰를 히에라키에 남겨 액세서리 연결을 보존
+  hidden: { position: 'absolute', width: 0, height: 0, opacity: 0, overflow: 'hidden' },
   findBar: {
     flexDirection: 'row',
     alignItems: 'center',
