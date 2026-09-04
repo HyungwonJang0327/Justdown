@@ -167,7 +167,10 @@ export default function NoteEditPane({
   const onChange = (text: string) => {
     setContent(text);
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => persist(text), 500);
+    saveTimer.current = setTimeout(() => {
+      saveTimer.current = null; // 발화 후 비워야 언마운트 flush 가 "미저장 있음"으로 오판하지 않는다
+      persist(text);
+    }, 500);
   };
 
   // 툴바에서 현재 커서 위치에 문자열 삽입
@@ -180,12 +183,15 @@ export default function NoteEditPane({
     setPendingSel({ start: caret, end: caret });
   };
 
-  // 언마운트(화면 이탈·노트 전환) 시 즉시 저장. 내비게이션 이벤트에 의존하지 않아
-  // 와이드 모드에서 key={id} 교체만으로도 flush 가 보장된다.
+  // 언마운트(화면 이탈·노트 전환) 시 미저장 변경만 즉시 저장.
+  // saveTimer 가 걸려 있다 = 디바운스가 아직 안 끝난 입력이 있다는 뜻.
+  // 변경이 없는데도 저장하면 updatedAt 이 갱신돼 목록 순서가 뒤바뀐다.
   useEffect(() => {
     return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      persist(contentRef.current);
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        persist(contentRef.current);
+      }
     };
   }, [persist]);
 
