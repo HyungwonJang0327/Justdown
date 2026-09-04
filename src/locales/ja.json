@@ -1,0 +1,14 @@
+{
+  "search": "検索",
+  "cancel": "キャンセル",
+  "find": "検索",
+  "delete": "削除",
+  "deleteConfirm": "このノートを削除しますか？",
+  "noSearchResults": "検索結果がありません。",
+  "emptyList": "ノートがありません。\n右上の＋ボタンで新しいノートを作成できます。",
+  "untitled": "（無題）",
+  "backToList": "一覧",
+  "selectNote": "ノートを選択するか、\n＋ボタンで新しいノートを作成してください。",
+  "editorPlaceholder": "# タイトル\n\n漢字《かんじ》のようにふりがなを入力できます。\nキーボード上の《 》ボタンを試してみてください。",
+  "noHeadings": "見出し（#）がありません。"
+}

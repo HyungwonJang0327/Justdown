@@ -1,0 +1,14 @@
+{
+  "search": "Search",
+  "cancel": "Cancel",
+  "find": "Find",
+  "delete": "Delete",
+  "deleteConfirm": "Delete this note?",
+  "noSearchResults": "No results found.",
+  "emptyList": "No notes yet.\nTap the + button in the top right to create one.",
+  "untitled": "(Untitled)",
+  "backToList": "Notes",
+  "selectNote": "Select a note, or\ntap the ＋ button to create a new one.",
+  "editorPlaceholder": "# Title\n\nAdd furigana like 漢字《かんじ》.\nTry the 《 》 button above the keyboard.",
+  "noHeadings": "No headings (#) found."
+}

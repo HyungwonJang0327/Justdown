@@ -1,0 +1,14 @@
+{
+  "search": "검색",
+  "cancel": "취소",
+  "find": "찾기",
+  "delete": "삭제",
+  "deleteConfirm": "이 노트를 삭제할까요?",
+  "noSearchResults": "검색 결과가 없습니다.",
+  "emptyList": "노트가 없습니다.\n오른쪽 위 + 버튼으로 새 노트를 만드세요.",
+  "untitled": "(제목 없음)",
+  "backToList": "목록",
+  "selectNote": "노트를 선택하거나\n＋ 버튼으로 새 노트를 만드세요.",
+  "editorPlaceholder": "# 제목\n\n漢字《かんじ》 처럼 후리가나를 넣을 수 있어요.\n키보드 위 《 》 버튼을 눌러보세요.",
+  "noHeadings": "헤딩(#)이 없습니다."
+}

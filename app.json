@@ -10,7 +10,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.hyungwonlabs.justdown",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["ko", "ja", "en"]
       }
     },
     "plugins": [
@@ -24,7 +25,8 @@
             "backgroundColor": "#151515"
           }
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "android": {
       "adaptiveIcon": {
