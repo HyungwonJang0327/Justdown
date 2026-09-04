@@ -12,6 +12,7 @@ export interface ThemeColors {
   tabActiveBg: string;
   tabActiveText: string;
   tabInactiveText: string;
+  destructive: string;
 }
 
 const light: ThemeColors = {
@@ -24,6 +25,7 @@ const light: ThemeColors = {
   tabActiveBg: '#ffffff',
   tabActiveText: '#1a1a1a',
   tabInactiveText: '#6a737d',
+  destructive: '#e5484d',
 };
 
 const dark: ThemeColors = {
@@ -36,6 +38,7 @@ const dark: ThemeColors = {
   tabActiveBg: '#2a2a2a',
   tabActiveText: '#ffffff',
   tabInactiveText: '#9aa0a6',
+  destructive: '#e5484d',
 };
 
 export function colorsFor(theme: ThemeName): ThemeColors {

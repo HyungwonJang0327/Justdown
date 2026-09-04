@@ -109,7 +109,7 @@ export default function NoteListScreen({ navigation }: Props) {
             <Swipeable
               renderRightActions={() => (
                 <TouchableOpacity
-                  style={styles.deleteAction}
+                  style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
                   onPress={() => removeNote(item.id)}
                 >
                   <Text style={styles.deleteActionText}>삭제</Text>
@@ -148,7 +148,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: 14, marginTop: 3 },
   headerBtn: { paddingHorizontal: 10, paddingVertical: 6 },
   deleteAction: {
-    backgroundColor: '#e5484d',
     justifyContent: 'center',
     alignItems: 'center',
     width: 88,
