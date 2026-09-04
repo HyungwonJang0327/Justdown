@@ -126,6 +126,15 @@ export default function TwoPaneScreen({ navigation }: Props) {
           query={query}
           selectedId={selectedId}
           onSelect={selectNote}
+          onDelete={(id) => {
+            // 열려 있는 노트가 삭제되면 오른쪽 pane 을 빈 상태로
+            if (id === selectedId) {
+              setSelectedId(null);
+              setIsNewNote(false);
+              setFindVisible(false);
+              setTocVisible(false);
+            }
+          }}
           refreshToken={refreshToken}
         />
       </View>

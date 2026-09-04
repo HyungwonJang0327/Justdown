@@ -22,12 +22,14 @@ interface Props {
   /** 와이드(2-pane) 모드에서 현재 열려 있는 노트 강조용 */
   selectedId?: string | null;
   onSelect: (id: string) => void;
+  /** 노트 삭제 직후 호출 (와이드 모드에서 열린 노트의 선택 해제용) */
+  onDelete?: (id: string) => void;
   /** 값이 바뀌면 목록을 다시 로드한다 */
   refreshToken: number;
 }
 
 /** 노트 목록 본문. 좁은 화면에선 NoteListScreen이, 와이드 모드에선 사이드바가 감싼다. */
-export default function NoteListPane({ query, selectedId, onSelect, refreshToken }: Props) {
+export default function NoteListPane({ query, selectedId, onSelect, onDelete, refreshToken }: Props) {
   const { colors } = useTheme();
   const [notes, setNotes] = useState<Note[]>([]);
   // ⋯ 메뉴가 열려 있는 노트 id (웹 전용)
@@ -56,6 +58,7 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
   const removeNote = async (id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     await deleteNoteInStorage(id);
+    onDelete?.(id);
   };
 
   const confirmDelete = (id: string) => {
