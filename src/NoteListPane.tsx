@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteNote as deleteNoteInStorage, loadNotes, noteTitle, type Note } from './storage';
 import { cleanHeadingText } from './markdown';
@@ -45,6 +45,11 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
   };
 
   const confirmDelete = (id: string) => {
+    // react-native-web 의 Alert 는 no-op — 웹은 브라우저 confirm 사용
+    if (Platform.OS === 'web') {
+      if (window.confirm('이 노트를 삭제할까요?')) removeNote(id);
+      return;
+    }
     Alert.alert('삭제', '이 노트를 삭제할까요?', [
       { text: '취소', style: 'cancel' },
       { text: '삭제', style: 'destructive', onPress: () => removeNote(id) },
@@ -91,13 +96,24 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
                 onPress={() => onSelect(item.id)}
                 onLongPress={() => confirmDelete(item.id)}
               >
-                <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-                  {title}
-                </Text>
-                {sub.length > 0 && (
-                  <Text style={[styles.sub, { color: colors.subText }]} numberOfLines={1}>
-                    {sub}
+                <View style={styles.rowBody}>
+                  <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+                    {title}
                   </Text>
+                  {sub.length > 0 && (
+                    <Text style={[styles.sub, { color: colors.subText }]} numberOfLines={1}>
+                      {sub}
+                    </Text>
+                  )}
+                </View>
+                {/* 웹은 스와이프·롱프레스 발견성이 낮아 삭제 버튼을 노출 */}
+                {Platform.OS === 'web' && (
+                  <TouchableOpacity
+                    onPress={() => confirmDelete(item.id)}
+                    style={styles.rowDelete}
+                  >
+                    <Text style={{ color: colors.subText, fontSize: 15 }}>✕</Text>
+                  </TouchableOpacity>
                 )}
               </TouchableOpacity>
             </Swipeable>
@@ -112,7 +128,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   emptyWrap: { flexGrow: 1, justifyContent: 'center' },
   empty: { textAlign: 'center', lineHeight: 24, paddingHorizontal: 32 },
-  row: { paddingVertical: 14, paddingHorizontal: 18, borderBottomWidth: StyleSheet.hairlineWidth },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowBody: { flex: 1 },
+  rowDelete: { paddingHorizontal: 8, paddingVertical: 6, marginLeft: 4 },
   title: { fontSize: 17, fontWeight: '600' },
   sub: { fontSize: 14, marginTop: 3 },
   deleteAction: {
