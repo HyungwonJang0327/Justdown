@@ -84,10 +84,10 @@ export default function TwoPaneScreen({ navigation }: Props) {
     return () => document.removeEventListener('keydown', onKey);
   }, [createNote, selectedId]);
 
-  // 헤더에는 제목·테마 토글만. 편집 컨트롤은 오른쪽 pane 상단 바에 둔다
+  // 헤더에는 제목·테마 토글(맨 오른쪽)만. 편집 컨트롤은 오른쪽 pane 상단 바에 둔다
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
+      headerRight: () => (
         <TouchableOpacity onPress={toggle} style={styles.headerBtn}>
           <Text style={{ fontSize: 17 }}>{theme === 'dark' ? '☀️' : '🌙'}</Text>
         </TouchableOpacity>
