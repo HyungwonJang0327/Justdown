@@ -47,6 +47,15 @@ export default function MarkdownPreview({
       srcDoc={renderMarkdownDocument(content, theme)}
       style={{ flex: 1, width: '100%', border: 'none', backgroundColor }}
       onLoad={() => {
+        // 노트 속 링크는 새 탭으로 열고, iframe 자체가 이동하는 것은 차단
+        // (네이티브 onShouldStartLoadWithRequest 와 대칭)
+        frameRef.current?.contentDocument?.addEventListener('click', (e) => {
+          const anchor = (e.target as Element | null)?.closest('a');
+          if (anchor && /^https?:\/\//.test(anchor.href)) {
+            e.preventDefault();
+            window.open(anchor.href, '_blank', 'noopener');
+          }
+        });
         // srcdoc 변경 시 재로드되므로 찾기 상태를 다시 적용
         if (findQuery) runFind(findQuery, findIndex);
       }}
