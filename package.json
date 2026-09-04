@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@react-native/jest-preset": "^0.86.3",
+    "@tauri-apps/cli": "^2.11.4",
     "@types/jest": "^29.5.14",
     "@types/markdown-it": "^14.2.0",
     "@types/react": "~19.2.2",
