@@ -4,10 +4,14 @@
 
 **[App Store에서 다운로드](https://apps.apple.com/kr/app/justdown/id6805135080)** · iOS / iPad / macOS(Tauri)
 
-<!-- TODO: screenshot — iPhone 편집 화면 (후리가나 렌더링) -->
-<!-- TODO: screenshot — iPad 가로 2-pane -->
+![iPad 가로 2-pane — 후리가나 프리뷰](docs/screenshots/ipad-two-pane.png)
+
+| 다크 모드 | 세로 모드 프리뷰 |
+|---|---|
+| ![다크 모드](docs/screenshots/ipad-dark.png) | <img src="docs/screenshots/ipad-preview.png" width="450" alt="세로 프리뷰"> |
+
+<!-- TODO: screenshot — iPhone 편집 화면 -->
 <!-- TODO: screenshot — macOS 데스크톱 앱 -->
-<!-- TODO: screenshot — 다크 모드 -->
 
 ## ✨ 핵심 기능
 

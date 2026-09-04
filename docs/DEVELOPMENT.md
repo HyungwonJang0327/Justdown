@@ -1,29 +1,23 @@
-# Justdown
+# Justdown — 개발 문서
 
-일본어 학습에 특화된 **개인용 iOS 마크다운 메모 앱**.
+일본어 학습에 특화된 **후리가나 마크다운 노트 앱**.
 
 한자 위에 요미가나(후리가나)를 얹는 `<ruby>` 렌더링을 제대로 지원하는 것이 핵심 기능이다.
 서버·계정·동기화 없이 모든 데이터를 기기 로컬에 저장한다.
 
 | | |
 |---|---|
-| 플랫폼 | iOS 전용 (Expo / React Native) |
+| 플랫폼 | iOS / iPad (Expo), macOS (Expo Web + Tauri) |
 | Bundle ID | `com.hyungwonlabs.justdown` |
-| 배포 | EAS Build → TestFlight (내부 테스트) |
-| 저장소 | AsyncStorage (기기 로컬) |
+| 배포 | iOS: EAS Build → App Store / macOS: `tauri build` → .app/.dmg (로컬 배포) |
+| 저장소 | AsyncStorage (기기 로컬 — 웹/Tauri에서는 localStorage 백엔드) |
+| 언어 | ko / ja / en (시스템 언어 따름) |
 
----
+## 출시 이력
 
-## 주요 기능
-
-- **마크다운 편집 + 미리보기**: 편집 화면 상단의 `Code` | `Preview` 탭으로 전환
-- **후리가나(요미가나)**: 아오조라 문고 표기법 `漢字《かんじ》` → 진짜 `<ruby>` 태그로 렌더링
-- **코드 구문강조**: highlight.js (라이트/다크 테마 대응)
-- **키보드 툴바**: `《 》`·`｜` 등 자주 쓰는 기호를 탭 한 번으로 삽입
-- **검색**: 노트 목록 전체 검색 + 현재 노트 내 찾기 (Code/Preview 양쪽 지원)
-- **목차(☰)**: 헤딩 아웃라인 패널 → 탭하면 해당 섹션으로 점프
-- **자동 저장**: 입력 후 0.5초 디바운스 저장, 화면 이탈 시 즉시 저장
-- **라이트/다크 테마**: 앱 내 토글, 선택값 저장
+- **1.0 → 1.0.1**: App Store 출시 (iPhone 전용). 1.0.1에서 앱 이름 "Justdown (ccf904)" → "Justdown" 정정
+- **1.1.0** (2026-09-05 제출): iPad 지원, 다국어(ko/ja/en), 버그픽스, `CFBundleDevelopmentRegion: ko`
+- **1.2 (계획)**: iCloud 동기화 — 아래 [향후 계획](#향후-계획-12-icloud-동기화) 참고
 
 ---
 
@@ -44,10 +38,11 @@
 
 ### 베이스 경계 지정 — `｜`
 
-베이스에 한자 이외 문자가 포함되거나 시작점을 명시하고 싶을 때:
+베이스에 한자 이외 문자(히라가나 등)가 포함되거나 시작점을 명시하고 싶을 때:
 
 ```
 ｜お茶《おちゃ》
+｜締め切り《しめきり》   ← り가 히라가나라 ｜ 없이는 변환되지 않는다
 ```
 
 `｜`(전각) 또는 `|`(반각)부터 `《` 직전까지가 베이스가 된다.
@@ -75,76 +70,105 @@ markdown-it 기반. GFM 스타일:
 - 헤딩(`#`~`######`), 볼드/이탤릭, 리스트, 인용구, 구분선, 링크(autolink 포함), 이미지, 표
 - 코드블록 구문강조: ` ```js ` 처럼 언어 지정 시 highlight.js 적용
 - `breaks: true` — 단순 줄바꿈도 `<br>`로 (메모 앱에 자연스러운 동작)
-- `html: true` — 직접 HTML 태그 사용 가능 (개인용 앱이므로 XSS 고려 불필요)
+- `html: true` — 직접 HTML 태그 사용 가능 (개인용 앱이므로 XSS 고려 불필요.
+  웹 배포·공유 기능을 추가하게 되면 재검토 필요 — 특성화 테스트로 의도를 고정해 둠)
+
+---
+
+## 레이아웃 규칙 (멀티 폼팩터)
+
+플랫폼이 아니라 **창 너비 + 방향** 기준으로 분기한다 (`App.tsx`):
+
+```
+wide = 너비 ≥ 700 && 너비 > 높이(가로형)
+```
+
+| 상황 | 레이아웃 |
+|---|---|
+| iPhone | 리스트 → push 네비게이션 (세로 고정) |
+| iPad 세로 | 리스트 → push (너비와 무관하게 세로형은 무조건) |
+| iPad 가로 | 사이드바 + 편집기 2-pane |
+| iPad Split View 절반 | 자동으로 push 모드 (너비 < 700) |
+| macOS/웹 | 창 비율에 따라 동일 규칙 |
+
+화면은 **Pane(코어)과 Screen(래퍼)으로 분리** — `NoteListPane`/`NoteEditPane`이 실제 UI를 담당하고,
+좁은 화면에선 `NoteListScreen`/`NoteEditScreen`이, 와이드 모드에선 `TwoPaneScreen`이 감싼다.
+
+iOS 회전 설정: iPhone은 세로 고정(`UISupportedInterfaceOrientations`), iPad는 전 방향(`~ipad` 키).
+`orientation` 필드는 `default` — Expo Go가 매니페스트 값으로 런타임 잠금을 걸기 때문
+(infoPlist 키는 실빌드에만 적용된다).
 
 ---
 
 ## 화면 구성
 
-### 노트 목록
+### 노트 목록 (좁은 화면)
 
 - 노트 리스트: 제목(내용 첫 줄에서 파생) + 미리보기 한 줄
-- **＋** (헤더 우상단): 새 노트
-- **🌙/☀️** (헤더 좌상단): 테마 전환
-- **검색바**: 제목+내용 대상 전체 검색
-  - iOS 26+: 화면 하단에 배치 (OS 네이티브 동작)
-  - iOS 18 이하: 헤더 아래 배치
-  - `placement` 미지정(`automatic`)으로 OS별 네이티브 스타일을 따른다
-- 노트 **롱프레스**: 삭제
+- **＋** / **🌙·☀️**: 새 노트 / 테마 전환 (헤더)
+- **검색바**: 제목+내용 대상 전체 검색 (iOS 네이티브 헤더 검색바, `placement: automatic`)
+- 노트 **스와이프/롱프레스**: 삭제
 
-### 노트 편집
+### 와이드 모드 (2-pane)
 
-- 헤더 가운데: `Code` | `Preview` 탭
-- 헤더 우측: **🔍** (찾기), **☰** (목차)
-- **Code 탭**: 모노스페이스 에디터 + 키보드 위 툴바
-- **Preview 탭**: WebView 렌더링 (로컬 HTML 문자열 — 네트워크/서버 불필요)
+- 왼쪽 사이드바: 검색 + 목록 (창 너비 구간별 300/340/400px)
+- 오른쪽 pane: 상단 바(Code|Preview 탭, 찾기·목차 버튼) + 편집기
+- 웹/macOS는 행에 **⋯ 메뉴**(삭제) 노출 — 스와이프 발견성이 낮아서
+- 열려 있는 노트를 목록에서 삭제하면 오른쪽 pane은 빈 상태로 전환
 
-### 키보드 툴바 (Code 탭)
+### 데스크톱 단축키 (웹/macOS)
+
+| 키 | 동작 |
+|---|---|
+| ⌘N | 새 노트 (브라우저에선 예약키라 Tauri에서만 실효) |
+| ⌘F | 노트 내 찾기 |
+| ⌘K | 후리가나 괄호 《》 삽입 (Code 탭) |
+| ⌘S | 브라우저 저장 다이얼로그 억제 (자동 저장이 있으므로) |
+| Esc | 찾기/목차 패널 닫기 |
+
+### 키보드 툴바 (Code 탭, iOS)
 
 | 버튼 | 동작 |
 |---|---|
 | `《 》` | 후리가나 괄호 삽입, 커서가 가운데로 |
 | `｜` | 베이스 경계 문자 |
-| `H` | `# ` (헤딩) |
-| `•` | `- ` (리스트) |
-| `B` | `****` 삽입, 커서가 가운데로 |
-| `</>` | 코드블록 삽입, 커서가 안쪽으로 |
+| `H` / `•` / `B` / `</>` | 헤딩 / 리스트 / 볼드 / 코드블록 |
 
 일본어 자판에서 `{}`·`[]`를 치기 어려운 문제(동일 키가 `『』`·`「」`로 입력됨)를 우회하기 위한 장치다.
 
-### 찾기 (🔍)
+### 찾기 (🔍) / 목차 (☰)
 
-- 대소문자 무시, 매치 수 `n/m` 표시, ↑/↓로 순환 이동
-- **Code 탭**: 매치 위치로 커서(selection) 이동 + 하이라이트
-- **Preview 탭**: WebView 안에서 `<mark>` 하이라이트 (현재 매치는 강조색) + 부드러운 스크롤
-- 목차 패널이 열린 상태에서 누르면 패널을 닫고 찾기를 활성화
-
-### 목차 (☰)
-
-- 문서의 ATX 헤딩(`#`~`######`)을 레벨별 들여쓰기로 표시 (코드블록 안 제외)
-- 표시 텍스트에서 후리가나 요미·마크업 자동 제거 (`面接《めんせつ》` → `面接`)
-- 탭하면: Preview = 해당 헤딩으로 스크롤 / Code = 해당 라인으로 커서 이동
-- 탭 전환 또는 항목 선택 시 자동으로 닫힘
+- 찾기: 대소문자 무시, 매치 수 `n/m`, ↑/↓ 순환. Code 탭=커서 이동, Preview 탭=`<mark>` 하이라이트
+- 목차: ATX 헤딩 아웃라인 (코드블록 안 제외, 후리가나 요미 제거). 탭하면 해당 위치로 이동
 
 ---
 
 ## 프로젝트 구조
 
 ```
-App.tsx                  네비게이션 + 테마 컨텍스트 프로바이더
+App.tsx                  네비게이션·테마 컨텍스트, 레이아웃 분기(창 너비+방향)
 index.ts                 엔트리 (Expo registerRootComponent)
-app.json                 Expo 설정 (bundle ID, 아이콘, EAS projectId 등)
-eas.json                 EAS 빌드/제출 프로파일
+app.json                 Expo 설정 (iPad 회전, CFBundleLocalizations 등)
+eas.json                 EAS 빌드/제출 프로파일 (ascAppId 포함)
 src/
   markdown.ts            markdown-it 설정, 후리가나 규칙, 헤딩 추출/앵커,
-                         HTML 문서 생성(테마 CSS + 프리뷰 찾기 스크립트 포함)
+                         프리뷰 HTML 문서 생성(양 테마 CSS + __setTheme/__find 스크립트)
   storage.ts             노트/테마 CRUD (AsyncStorage 래핑), 제목 파생,
                          소프트 삭제(tombstone) + 구버전 블롭 마이그레이션
-  __tests__/storage.test.ts  storage 단위 테스트 (jest-expo)
+  i18n.ts, locales/      expo-localization + i18n-js (ko/ja/en, en 폴백)
   theme.ts               라이트/다크 색상 팔레트 + ThemeContext
   navigation.ts          네비게이션 파라미터 타입
-  NoteListScreen.tsx     노트 목록 (검색바, 헤더 버튼)
-  NoteEditScreen.tsx     편집기 (탭, 툴바, 찾기, 목차 패널)
+  NoteListPane.tsx       노트 목록 코어 (좁은 화면·와이드 공용, 웹 ⋯ 메뉴)
+  NoteEditPane.tsx       편집기 코어 (탭·툴바·찾기·목차·자동 저장)
+  NoteListScreen.tsx     좁은 화면용 목록 래퍼 (네이티브 헤더 검색바)
+  NoteEditScreen.tsx     좁은 화면용 편집 래퍼
+  TwoPaneScreen.tsx      와이드 2-pane + 데스크톱 단축키
+  EditHeader.tsx         Code|Preview 탭·찾기·목차 버튼 (공용)
+  MarkdownPreview.tsx    네이티브 프리뷰 (WebView + injectJavaScript)
+  MarkdownPreview.web.tsx  웹 프리뷰 (srcdoc iframe — 플랫폼 분기)
+  __tests__/             단위 테스트 (markdown·storage·i18n)
+src-tauri/               macOS 데스크톱 래퍼 (Rust, Tauri 2)
+docs/screenshots/        README용 스크린샷
 ```
 
 ### 데이터 모델
@@ -158,19 +182,41 @@ interface Note {
 }
 ```
 
-AsyncStorage 키:
+AsyncStorage 키: `justdown.note.<id>` (노트당 1키), `justdown.theme`
 
-| 키 | 내용 |
-|---|---|
-| `justdown.note.<id>` | `Note` JSON (노트당 1키) |
-| `justdown.theme` | `"light"` \| `"dark"` |
+- **소프트 삭제**: 키를 지우지 않고 tombstone을 남긴다 — 동기화 대비.
+  **tombstone은 `saveNote`로 부활하지 않는다** (삭제 직후 에디터 unmount flush가
+  덮어쓰는 경쟁을 저장 계층에서 차단)
+- **마이그레이션**: 구버전 단일 블롭(`justdown.notes`)을 발견하면 노트별 키로 분해 (자동, 1회)
+- 목록은 `updatedAt` 내림차순. 빈 노트는 저장하지 않으며, 기존 노트를 비우면 삭제
+- 웹/Tauri에서 AsyncStorage는 localStorage 백엔드 — **dev 서버(localhost:8081)와
+  프로덕션(tauri:// 오리진)은 저장소가 분리**되어 데이터가 서로 넘어가지 않는다
 
-- **소프트 삭제**: 삭제 시 키를 지우지 않고 `{ content: '', deletedAt }` tombstone을 남긴다.
-  나중에 서버 동기화를 붙일 때 "이 기기에서 삭제됨"을 구분하기 위한 최소 준비다.
-- **마이그레이션**: 구버전은 전체 노트를 `justdown.notes` 블롭 1개에 저장했다.
-  `loadNotes()`가 블롭을 발견하면 노트별 키로 분해 저장 후 블롭을 제거한다 (자동, 1회).
-- 목록은 `updatedAt` 내림차순(최신순)으로 반환된다.
-- 빈 노트(공백만)는 저장하지 않으며, 기존 노트를 비우면 삭제된다.
+---
+
+## 다국어 (i18n)
+
+- `expo-localization` + `i18n-js`. 시스템 언어 따름(선택 UI 없음), 미지원 언어는 `en` 폴백
+- `src/locales/{ko,ja,en}.json` — 키 동일성은 테스트로 고정
+- 에디터 플레이스홀더의 후리가나 예시(`漢字《かんじ》`)는 전 언어 유지 (테스트로 고정)
+- `CFBundleLocalizations: [ko, ja, en]` + `CFBundleDevelopmentRegion: ko` — 스토어 언어 표기용
+
+---
+
+## macOS 데스크톱 (Tauri)
+
+Expo Web 번들을 Tauri 2로 래핑. 산출물 ~4MB(.dmg).
+
+```bash
+npx tauri dev     # 개발 (Rust 툴체인 필요: rustup)
+npx tauri build   # .app / .dmg (src-tauri/target/release/bundle/)
+```
+
+- devUrl=`localhost:8081`(expo web), frontendDist=`dist`(`expo export -p web`)
+- 창 1100×760, identifier는 iOS와 동일
+- 미서명(로컬 실행용) — 배포하려면 Developer ID 서명·공증 또는 Mac App Store 절차 필요
+- **Tauri 웹뷰는 Metro HMR이 동작하지 않는다** — 코드 반영은 앱 재시작 필요
+- react-native-macos는 Expo 통합 마찰이 커서 배제했다
 
 ---
 
@@ -178,108 +224,55 @@ AsyncStorage 키:
 
 ### 요구사항
 
-- Node.js 20.19.4+ 권장 (20.17.0에서도 동작하나 Expo가 경고를 출력)
-- Xcode + iOS 시뮬레이터 또는 실기기의 Expo Go 앱
+- Node.js 20.19.4+ 권장 / Xcode + iOS 시뮬레이터 또는 Expo Go / (macOS 빌드 시) Rust
 
-### 실행
+### 실행·검증
 
 ```bash
 npm install
-npx expo start        # 이후 i = iOS 시뮬레이터, 또는 Expo Go로 QR 스캔
+npx expo start        # i = iOS 시뮬레이터, w = 웹
+
+npm test              # 단위 테스트 (jest-expo)
+npm run typecheck     # tsc --noEmit
+npm run lint          # expo lint
 ```
 
-### 검증
+- jest는 **29.x로 고정** — `@react-native/jest-preset`(RN 0.86)이 jest 29 런타임을 쓰므로
+  jest 30을 설치하면 `clearMocksOnScope` 오류로 깨진다
+- WebKit(Safari/Tauri) 전용 렌더링·이벤트 버그는 **Playwright WebKit으로 재현**하는 패턴이 유효했다
+  (localStorage 시딩 → UI 조작 → 지오메트리/스크린샷 검증)
+
+### 배포 (iOS)
 
 ```bash
-npm test                                                # 단위 테스트 (jest-expo)
-npx tsc --noEmit                                        # 타입체크
-npx expo export --platform ios --output-dir /tmp/out    # 번들 빌드 확인
-npx expo-doctor                                         # 프로젝트 설정 점검
+eas build --platform ios --profile production   # 빌드번호 autoIncrement
+eas submit -p ios --latest                      # ascAppId는 eas.json에 설정됨
 ```
 
-테스트는 `jest-expo` preset + AsyncStorage 공식 mock(`jest-setup.js`)을 사용한다.
-jest는 **29.x로 고정** — `@react-native/jest-preset`(RN 0.86)이 jest 29 런타임을 쓰므로
-jest 30을 설치하면 `clearMocksOnScope` 오류로 깨진다.
-설치 시 peer 충돌은 `--legacy-peer-deps`로 우회한다 (react-native 0.86.2 ↔ jest-preset 0.86.3).
+- EAS 빌드는 **미커밋 워킹 트리를 포함**한다 — 프로덕션 빌드 전 `git status` 클린 확인 필수
+- 스토어 스크린샷: 시뮬레이터 ⌘S로 기기 해상도 저장 (iPad는 13인치 2064×2752 필수 규격).
+  데모 노트는 App.tsx에 임시 시딩 코드로 준비 (커밋 금지)
 
 ---
 
-## 배포 (TestFlight)
+## 향후 계획: 1.2 iCloud 동기화
 
-유료 Apple Developer Program 멤버십 필요. 빌드번호는 `autoIncrement`로 자동 증가한다.
+브레인스토밍으로 확정된 방향 (2026-09-05). 설계·구현은 1.1 출시 후.
 
-```bash
-eas build --platform ios --profile production --auto-submit
-```
+- **범위**: iPhone ↔ iPad만 (macOS Tauri는 미서명이라 iCloud 접근이 까다로워 제외)
+- **방식**: CloudKit private DB + 커스텀 Expo 네이티브 모듈(Swift) — 노트 1개 = CKRecord 1개
+- **트리거**: 앱 시작·포그라운드 복귀·저장 후 폴링 (silent push는 APNs 의존이라 배제 — 푸시 미도입 방침과 충돌)
+- **충돌**: 노트 단위 LWW (`updatedAt` 비교), tombstone도 동일 규칙
+- **UX**: 자동 동기화(무설정, Apple 순정 앱 관례). 포지셔닝은 "자체 서버 없음·수집 없음"으로 조정
+- 네이티브 모듈 도입 시 Expo Go 개발 불가 → dev build 워크플로우 전환 필요
 
-- 인증서/프로비저닝은 EAS가 관리 (최초 1회 Apple 로그인 후 저장됨)
-- `ITSAppUsesNonExemptEncryption: false`가 app.json에 있어 수출 규정 질문은 생략됨
-- 업로드 후 App Store Connect 처리(수 분) → TestFlight 앱에서 설치
-- 내부 테스트 그룹은 심사 없이 바로 설치 가능
+## 향후 계획: 자동 후리가나 (방향만 확정)
 
----
-
-## App Store 출시 점검 (2026-08-27)
-
-빌드를 막는 결격 사유는 없음. 확인 완료 항목과 남은 항목:
-
-### 통과
-
-- 앱 아이콘 1024×1024, 알파 채널 없음
-- `ITSAppUsesNonExemptEncryption: false` (수출 규정 질문 생략)
-- 빌드번호 자동 관리 (`appVersionSource: remote` + `autoIncrement`)
-- 권한/네트워크/추적 없음 → App Privacy는 "데이터 수집 안 함"으로 선언
-- WebView 외부 링크: Safari로 열고 WebView 이탈 차단 (`onShouldStartLoadWithRequest`) — 2026-08-28 처리
-- iPad: `supportsTablet: false`로 1.0 출시 — 2026-08-28 처리.
-  **한번 iPad 지원으로 출시하면 업데이트에서 기기 지원을 축소할 수 없으므로**,
-  미검증 상태로 켜는 대신 2-pane 레이아웃 완성 후 재활성화한다
-- 스플래시: `expo-splash-screen` 플러그인 설정 (라이트 `#ffffff` / 다크 `#151515`) — 2026-08-28 처리
-- 의존성 패치 정렬: expo 57.0.17 / react-native 0.86.3 (`expo-doctor` 18/18 통과) — 2026-08-28 처리
-
-### 남은 항목
-
-| 항목 | 내용 |
-|---|---|
-| 개인정보처리방침 URL | 수집 데이터가 없어도 URL 자체는 App Store Connect 필수 입력. GitHub Pages에 "수집 안 함" 페이지 게시 후 App Privacy에 입력 |
-| 스크린샷·설명 | App Store Connect에 iPhone 스크린샷, 앱 설명(후리가나 지원 강조), 심사 연락처 입력 |
-
----
-
-## 향후 계획: macOS 데스크톱 앱
-
-브레인스토밍으로 확정된 방향 (2026-08-27):
-
-- **목적**: 개인용/사이드 배포 (Mac App Store 심사 없음)
-- **접근**: Expo Web 내보내기(`expo export -p web`) + **Tauri** 래핑 → .app/DMG
-  - 코드베이스 하나 유지, 반응형 2-pane 레이아웃은 iPad 가로 모드에도 그대로 이득
-  - react-native-macos는 Expo와 통합 마찰이 커서 배제
-- **UX**: 사이드바 노트 목록 + 에디터·프리뷰 2-pane, ⌘N/⌘S/⌘F 단축키
-- **동기화**: 당장 없음. 대비책으로 소프트 삭제(tombstone)만 도입 완료 (위 데이터 모델 참고)
-  - 서버가 생기면 같은 코드를 웹앱으로도 배포 가능 (fetch/WebSocket은 래퍼 무관)
-
-단계: ① 웹 타깃 구동 (WebView → iframe 분기) → ② 2-pane + 단축키 → ③ Tauri 래핑/패키징
-
----
-
-## 향후 계획: 자동 후리가나 (v1.1 이후, 방향만 확정)
-
-브레인스토밍으로 확정된 방향 (2026-08-31). 설계·구현은 1.0 출시 후 시작.
-
-- **엔진**: MeCab + UniDic 온디바이스 (Expo Modules API 네이티브 모듈, iOS 우선)
-  - LLM/서버/로그인/결제 불필요 — 로컬 온리 정체성 유지
-  - 네이티브 모듈 도입 시 Expo Go 개발 불가 → dev build 워크플로우 전환 필요
-- **사전 배포**: 앱 번들에 포함하지 않고 **설치 후 온디맨드 다운로드** (앱 번들·업데이트 경량 유지)
-  - 다운로드 기능이 생기면 앱 설명의 "네트워크 통신 없음" 문구 조정 필요 (App Privacy "수집 안 함"은 유지 가능)
-- **UX**: Code 탭의 변환 버튼 → **노트 전체 한 번에** 한자에 《요미》를 소스로 삽입
-  - 이미 《》가 붙은 한자는 건너뜀, 사용자가 결과를 직접 수정 가능
-- **선택적 요미 표시** (아는 단어는 요미 생략):
-  - 레벨 0 (공짜): 소스 삽입 방식이라 아는 단어의 《요미》는 직접 지우면 됨
-  - 레벨 1 (v1.1 포함): **제외 단어 사전** — 사용자가 요미를 지운 단어를 목록에 기록하고
-    재변환 시 건너뜀 (AsyncStorage, 설정에 목록 관리 화면)
-  - 레벨 2 (이후): JLPT 급수/빈도 기반 필터 ("N2 이하 한자는 생략" 등)
-  - 레벨 3 (이후): Preview **암기 모드** — 요미를 가리고 한자 탭 시 표시
-    (CSS rt 숨김 + 탭 핸들러, 플래시카드 효과)
-- 미정: 사전 버전/크기(unidic-lite vs ipadic), 호스팅 위치, 다운로드 UI
+- **엔진**: MeCab + UniDic 온디바이스 (Expo Modules API, iOS 우선) — 로컬 온리 정체성 유지
+- **사전 배포**: 앱 번들에 포함하지 않고 설치 후 온디맨드 다운로드
+- **UX**: Code 탭의 변환 버튼 → 노트 전체 한 번에 한자에 《요미》를 소스로 삽입.
+  이미 《》가 붙은 한자는 건너뜀
+- **선택적 요미 표시**: 제외 단어 사전 → JLPT 급수 필터 → Preview 암기 모드 순으로 단계 확장
 
 ---
 
@@ -287,36 +280,52 @@ eas build --platform ios --profile production --auto-submit
 
 버그 수정 시 참고할 것. 재발 방지 근거가 담겨 있다.
 
+### Tauri (WKWebView) 래핑에서 잡은 것들
+
+- **`window.confirm`은 no-op** — WKWebView 기반 Tauri 웹뷰는 JS 블로킹 다이얼로그를
+  구현하지 않아 항상 falsy를 반환한다. confirm 기반 삭제 확인이 조용히 죽는 원인.
+  웹 삭제는 ⋯ 메뉴 2단계 조작이므로 즉시 삭제로 통일했다 (tombstone이라 즉시 소실도 아님)
+- **전역 단축키는 capture 단계로 등록** — react-native-web `TextInput`의 `handleKeyDown`이
+  keydown을 무조건 `stopPropagation` 하므로, 에디터 포커스 중엔 document의 bubble 리스너가
+  아예 실행되지 않는다 (Chrome에선 ⌘F가 브라우저 찾기로 넘어가 눈치채기 어려웠던 잠복 버그)
+- **팝오버 zIndex는 FlatList 셀에 줘야 한다** — 셀 래퍼가 `z-index:0` stacking context를
+  만들어, 행에 zIndex를 줘도 셀 컨텍스트에 갇혀 다음 셀이 팝오버를 덮는다 (마지막 행만
+  정상이던 증상). `CellRendererComponent`로 메뉴가 열린 셀 자체를 끌어올린다
+- **테마 전환 시 프리뷰 문서를 재생성하지 않는다** — 테마가 srcdoc/html에 구워져 있으면
+  전환마다 iframe/WebView가 리로드되어 스크롤이 소실된다. CSS 변수로 양 테마를 한 문서에
+  담고 `__setTheme`로 html 클래스만 전환. 문서는 content 변경 때만 재생성(useMemo)
+- **Tauri 웹뷰는 HMR 미동작** — Fast Refresh를 기대하지 말고 앱을 재시작할 것
+- 진단 팁: 웹뷰 콘솔 로그는 로드 시점 이후 중계되지 않는다 — keydown 등 런타임 이벤트는
+  로컬 수집 서버(`fetch`로 전송)를 임시로 심는 편이 확실하다
+
+### Expo Go / 시뮬레이터
+
+- **Expo Go는 매니페스트의 `orientation` 값으로 런타임 회전 잠금을 건다** — infoPlist의
+  기기별 회전 키는 실빌드에만 적용되므로, 회전 테스트를 하려면 `orientation: default`가 필요
+- 스토어 스크린샷 규격: iPad는 **13인치**(2064×2752)가 필수 클래스 — 11인치로 찍으면 반려됨
+- 상태바 정리: `xcrun simctl status_bar booted override --time "9:41" --batteryLevel 100 ...`
+
 ### InputAccessoryView (키보드 툴바)
 
 - `nativeID`는 **화면 인스턴스마다 유니크해야 한다** (`useRef`로 마운트당 생성).
-  고정 문자열을 쓰면 화면 재마운트 시 이전 등록과 충돌해 툴바가 붙지 않는다.
-- 탭 전환 시 `TextInput`을 **언마운트하지 말고 숨긴다**.
-  재마운트되면 키보드 액세서리 연결이 끊긴다.
+  고정 문자열을 쓰면 화면 재마운트 시 이전 등록과 충돌해 툴바가 붙지 않는다
+- 탭 전환 시 `TextInput`을 **언마운트하지 말고 숨긴다**. 재마운트되면 액세서리 연결이 끊긴다
 - `TextInput`은 **InputAccessoryView와 같은 첫 렌더 커밋에 마운트해야 한다**.
-  내용 로드 완료 후(늦게) 마운트하면 연결이 안 생긴다 — 로드가 느린 긴 노트일수록 재현되어
-  "특정 노트에서만 툴바가 안 나오는" 증상이 됐다. 그래서 빈 값으로 즉시 마운트하고 내용은 나중에 채운다.
+  로드가 느린 긴 노트일수록 재현되어 "특정 노트에서만 툴바가 안 나오는" 증상이 됐다.
+  그래서 빈 값으로 즉시 마운트하고 내용은 나중에 채운다
 - 숨김은 `display:'none'`이 아니라 **0-크기 + opacity 0**으로 한다.
-  display none은 네이티브 뷰가 히에라키에서 빠져 액세서리 연결이 유지되지 않는다.
+  display none은 네이티브 뷰가 히에라키에서 빠져 액세서리 연결이 유지되지 않는다
 
-### 키보드가 문서 하단을 가리는 문제
+### 키보드/검색바/커서
 
-- 헤더가 있는 화면의 `KeyboardAvoidingView`에는 `useHeaderHeight()` 값을
-  `keyboardVerticalOffset`으로 줘야 한다. 없으면 헤더 높이만큼 계산이 어긋난다.
-
-### iOS 26 검색바
-
-- iOS 26부터 네이티브 검색 필드가 **화면 하단에 상주**한다 (`placement: 'automatic'` 기준).
-  하단에 절대위치 요소(FAB 등)를 두면 겹치므로, 액션 버튼은 헤더에 배치한다.
-- `placement: 'stacked'`로 모든 버전에서 상단 고정도 가능하지만, OS별 네이티브 스타일을 따르기로 결정했다.
-- `cancelButtonText`는 iOS 26부터 무시된다 (취소 버튼에 텍스트가 없어짐). 구버전용으로 유지 중.
-
-### 에디터 커서 제어
-
-- `TextInput`은 평소 **uncontrolled selection**으로 두고(입력 중 커서 튐 방지),
-  툴바 삽입/찾기 이동 직후에만 `selection` prop을 잠깐 제어한 뒤 `onSelectionChange`에서 해제한다.
+- 헤더가 있는 화면의 `KeyboardAvoidingView`에는 `useHeaderHeight()`를
+  `keyboardVerticalOffset`으로 줘야 한다
+- iOS 26부터 네이티브 검색 필드가 화면 하단에 상주한다 — 하단 절대위치 요소(FAB)와 겹치므로
+  액션 버튼은 헤더에 배치. `cancelButtonText`는 iOS 26부터 무시됨 (구버전용 유지)
+- `TextInput`은 평소 uncontrolled selection으로 두고(입력 중 커서 튐 방지),
+  툴바 삽입/찾기 이동 직후에만 `selection`을 잠깐 제어한 뒤 해제한다
 
 ### 프리뷰 찾기
 
-- WebView는 Preview 진입마다 재로드되므로, `onLoadEnd`에서 찾기 상태를 재적용한다.
-- 매치 수는 DOM 기준으로 세서 `postMessage`로 RN에 돌려준다 (소스 기준 카운트와 다를 수 있음).
+- WebView는 Preview 진입마다 재로드되므로 `onLoadEnd`에서 테마·찾기 상태를 재적용한다
+- 매치 수는 DOM 기준으로 세서 `postMessage`로 RN에 돌려준다
