@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import {
   InputAccessoryView,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -11,11 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { deleteNote, loadNote, saveNote } from './storage';
-import { extractHeadings, renderMarkdownDocument, type Heading } from './markdown';
+import { extractHeadings, type Heading } from './markdown';
+import MarkdownPreview from './MarkdownPreview';
+import type { MarkdownPreviewHandle } from './MarkdownPreviewTypes';
 import { useTheme } from './theme';
 import type { RootStackParamList } from './navigation';
 
@@ -77,13 +77,10 @@ export default function NoteEditScreen({ route, navigation }: Props) {
     return out;
   }, [content, findQuery]);
 
-  // 매치로 이동. Code 탭=커서(selection) 이동, Preview 탭=WebView 하이라이트 스크롤
+  // 매치로 이동. Code 탭=커서(selection) 이동, Preview 탭=프리뷰 하이라이트 스크롤
   const gotoMatch = (idx: number) => {
     if (tab === 'preview') {
-      setFindIndex(idx); // 래핑은 WebView 쪽 __find가 처리
-      webviewRef.current?.injectJavaScript(
-        `window.__find && window.__find(${JSON.stringify(findQuery)}, ${idx}); true;`
-      );
+      setFindIndex(idx); // 래핑·스크롤은 MarkdownPreview가 findIndex 변화에 반응해 처리
       return;
     }
     if (matches.length === 0) return;
@@ -96,27 +93,15 @@ export default function NoteEditScreen({ route, navigation }: Props) {
     setPendingSel(sel);
   };
 
-  // Preview 탭에서 찾기 상태가 바뀌면 WebView에 반영 (닫히면 빈 쿼리로 하이라이트 제거)
-  useEffect(() => {
-    if (tab !== 'preview') return;
-    const q = findVisible ? findQuery : '';
-    webviewRef.current?.injectJavaScript(
-      `window.__find && window.__find(${JSON.stringify(q)}, ${findIndex}); true;`
-    );
-  }, [tab, findVisible, findQuery, findIndex]);
-
   // 목차
-  const webviewRef = useRef<WebView>(null);
+  const previewRef = useRef<MarkdownPreviewHandle>(null);
   const [tocVisible, setTocVisible] = useState(false);
   const headings = useMemo(() => extractHeadings(content), [content]);
 
   const gotoHeading = (h: Heading) => {
     setTocVisible(false);
     if (tab === 'preview') {
-      // 헤딩 앵커(id="hl-<line>")로 스크롤
-      webviewRef.current?.injectJavaScript(
-        `document.getElementById('hl-${h.line}')?.scrollIntoView({behavior:'smooth',block:'start'}); true;`
-      );
+      previewRef.current?.scrollToHeading(h.line);
     } else {
       // 헤딩 라인으로 커서 이동 (찾기와 같은 메커니즘)
       const sel = { start: h.offset, end: h.offset + h.length };
@@ -242,6 +227,26 @@ export default function NoteEditScreen({ route, navigation }: Props) {
   const findCount = tab === 'preview' ? previewCount : matches.length;
   const findPos = findCount === 0 ? 0 : ((findIndex % findCount) + findCount) % findCount;
 
+  // 서식 툴바: iOS는 키보드 액세서리로, 웹은 에디터 상단 고정 바로 표시
+  const toolbar = (
+    <View style={[styles.accessory, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <ScrollView horizontal keyboardShouldPersistTaps="always" showsHorizontalScrollIndicator={false}>
+        {TOOLBAR.map((b) => (
+          <TouchableOpacity
+            key={b.label}
+            style={[styles.toolBtn, { borderColor: colors.border }]}
+            onPress={() => {
+              insert(b.snippet, b.caretBack);
+              inputRef.current?.focus(); // 웹: 버튼 클릭으로 빠진 포커스를 에디터로 복귀
+            }}
+          >
+            <Text style={[styles.toolText, { color: colors.text }]}>{b.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.bg }]}
@@ -287,6 +292,7 @@ export default function NoteEditScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       )}
+      {Platform.OS === 'web' && tab === 'code' && toolbar}
       {/* TextInput은 InputAccessoryView(툴바)와 같은 첫 렌더 커밋에 마운트되어야
           액세서리 연결이 생긴다 (늦게 마운트하면 내용 로드가 느린 노트에서 연결 실패).
           그래서 로드 완료를 기다리지 않고 빈 값으로 즉시 마운트하고, 내용은 나중에 채운다.
@@ -312,36 +318,14 @@ export default function NoteEditScreen({ route, navigation }: Props) {
           keyboardAppearance={theme === 'dark' ? 'dark' : 'light'}
         />
       {loaded && tab === 'preview' && (
-        <WebView
-          ref={webviewRef}
-          originWhitelist={['*']}
-          style={{ backgroundColor: colors.bg }}
-          source={{ html: renderMarkdownDocument(content, theme) }}
-          // 노트 속 링크는 Safari로 열고, WebView 자체가 외부로 이동하는 것은 차단
-          onShouldStartLoadWithRequest={(req) => {
-            if (req.url.startsWith('http://') || req.url.startsWith('https://')) {
-              Linking.openURL(req.url);
-              return false;
-            }
-            return true;
-          }}
-          showsVerticalScrollIndicator
-          onMessage={(e) => {
-            try {
-              const msg = JSON.parse(e.nativeEvent.data);
-              if (msg.type === 'findCount') setPreviewCount(msg.count);
-            } catch {
-              // 무시
-            }
-          }}
-          onLoadEnd={() => {
-            // WebView는 Preview 진입마다 재로드되므로 찾기 상태를 다시 적용
-            if (findVisible && findQuery) {
-              webviewRef.current?.injectJavaScript(
-                `window.__find && window.__find(${JSON.stringify(findQuery)}, ${findIndex}); true;`
-              );
-            }
-          }}
+        <MarkdownPreview
+          ref={previewRef}
+          content={content}
+          theme={theme}
+          findQuery={findVisible ? findQuery : ''}
+          findIndex={findIndex}
+          onFindCount={setPreviewCount}
+          backgroundColor={colors.bg}
         />
       )}
 
@@ -379,21 +363,10 @@ export default function NoteEditScreen({ route, navigation }: Props) {
         </View>
       )}
 
-      <InputAccessoryView nativeID={accessoryId}>
-        <View style={[styles.accessory, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <ScrollView horizontal keyboardShouldPersistTaps="always" showsHorizontalScrollIndicator={false}>
-            {TOOLBAR.map((b) => (
-              <TouchableOpacity
-                key={b.label}
-                style={[styles.toolBtn, { borderColor: colors.border }]}
-                onPress={() => insert(b.snippet, b.caretBack)}
-              >
-                <Text style={[styles.toolText, { color: colors.text }]}>{b.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </InputAccessoryView>
+      {/* InputAccessoryView는 iOS 전용 (웹/안드로이드에서는 렌더하지 않음) */}
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={accessoryId}>{toolbar}</InputAccessoryView>
+      )}
     </KeyboardAvoidingView>
   );
 }
