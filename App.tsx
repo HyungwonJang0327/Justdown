@@ -15,13 +15,15 @@ import type { RootStackParamList } from './src/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// 이 너비 이상이면 2-pane(사이드바+본문) 레이아웃 — 플랫폼이 아니라 창 너비 기준
-// (브라우저 리사이즈·iPad 가로모드에 동일하게 적용)
+// 이 너비 이상 + 가로형(너비>높이)이면 2-pane(사이드바+본문) 레이아웃.
+// 세로형은 너비와 무관하게 리스트→push (iPad 세로모드 포함).
+// 브라우저 리사이즈·iPad 회전·Split View 에 동일하게 적용.
 const WIDE_BREAKPOINT = 700;
 
 export default function App() {
   const [theme, setTheme] = useState<ThemeName>('light');
-  const wide = useWindowDimensions().width >= WIDE_BREAKPOINT;
+  const { width, height } = useWindowDimensions();
+  const wide = width >= WIDE_BREAKPOINT && width > height;
 
   useEffect(() => {
     loadTheme().then(setTheme);
