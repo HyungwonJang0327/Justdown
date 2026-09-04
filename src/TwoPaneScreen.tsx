@@ -1,5 +1,6 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -49,16 +50,41 @@ export default function TwoPaneScreen({ navigation }: Props) {
     setTocVisible(false);
   };
 
-  const createNote = () => {
+  const createNote = useCallback(() => {
     const id = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
     setSelectedId(id);
     setIsNewNote(true);
     setTab('code');
     setFindVisible(false);
     setTocVisible(false);
-  };
+  }, []);
 
-  // 헤더: 왼쪽 테마 토글, 가운데 탭·오른쪽 찾기/목차는 노트가 선택됐을 때만
+  // 데스크톱 단축키 (웹 전용). ⌘N 은 브라우저가 예약한 키라 Tauri 래핑에서만 실효.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setFindVisible(false);
+        setTocVisible(false);
+        return;
+      }
+      if (!e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) return;
+      if (e.key === 'n') {
+        e.preventDefault();
+        createNote();
+      } else if (e.key === 'f' && selectedId) {
+        e.preventDefault();
+        setTocVisible(false);
+        setFindVisible(true);
+      } else if (e.key === 's') {
+        e.preventDefault(); // 자동 저장이 있으므로 브라우저 저장 다이얼로그만 막는다
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [createNote, selectedId]);
+
+  // 헤더에는 제목·테마 토글만. 편집 컨트롤은 오른쪽 pane 상단 바에 둔다
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -66,35 +92,8 @@ export default function TwoPaneScreen({ navigation }: Props) {
           <Text style={{ fontSize: 17 }}>{theme === 'dark' ? '☀️' : '🌙'}</Text>
         </TouchableOpacity>
       ),
-      headerTitle: selectedId
-        ? () => (
-            <EditTabs
-              tab={tab}
-              onChange={(t) => {
-                setTab(t);
-                setTocVisible(false); // 탭 전환 시 목차 패널 닫기
-              }}
-            />
-          )
-        : 'Justdown',
-      headerRight: selectedId
-        ? () => (
-            <EditHeaderButtons
-              onToggleFind={() => {
-                if (tocVisible) {
-                  // 목차가 열려 있으면 닫고 검색을 활성화
-                  setTocVisible(false);
-                  setFindVisible(true);
-                } else {
-                  setFindVisible((v) => !v);
-                }
-              }}
-              onToggleToc={() => setTocVisible((v) => !v)}
-            />
-          )
-        : undefined,
     });
-  }, [navigation, theme, toggle, selectedId, tab, tocVisible]);
+  }, [navigation, theme, toggle]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -130,18 +129,42 @@ export default function TwoPaneScreen({ navigation }: Props) {
 
       <View style={styles.detail}>
         {selectedId ? (
-          // key=id: 노트 전환 시 pane을 재마운트해 이전 노트를 flush 저장하고 새로 로드
-          <NoteEditPane
-            key={selectedId}
-            id={selectedId}
-            isNew={isNewNote}
-            tab={tab}
-            findVisible={findVisible}
-            tocVisible={tocVisible}
-            onRequestCloseFind={() => setFindVisible(false)}
-            onRequestCloseToc={() => setTocVisible(false)}
-            onSaved={refreshList}
-          />
+          <>
+            {/* pane 상단 고정 바: 탭 전환 + 찾기·목차 */}
+            <View style={[styles.detailBar, { borderBottomColor: colors.border }]}>
+              <EditTabs
+                tab={tab}
+                onChange={(t) => {
+                  setTab(t);
+                  setTocVisible(false); // 탭 전환 시 목차 패널 닫기
+                }}
+              />
+              <EditHeaderButtons
+                onToggleFind={() => {
+                  if (tocVisible) {
+                    // 목차가 열려 있으면 닫고 검색을 활성화
+                    setTocVisible(false);
+                    setFindVisible(true);
+                  } else {
+                    setFindVisible((v) => !v);
+                  }
+                }}
+                onToggleToc={() => setTocVisible((v) => !v)}
+              />
+            </View>
+            {/* key=id: 노트 전환 시 pane을 재마운트해 이전 노트를 flush 저장하고 새로 로드 */}
+            <NoteEditPane
+              key={selectedId}
+              id={selectedId}
+              isNew={isNewNote}
+              tab={tab}
+              findVisible={findVisible}
+              tocVisible={tocVisible}
+              onRequestCloseFind={() => setFindVisible(false)}
+              onRequestCloseToc={() => setTocVisible(false)}
+              onSaved={refreshList}
+            />
+          </>
         ) : (
           <View style={styles.emptyWrap}>
             <Text style={[styles.empty, { color: colors.subText }]}>
@@ -174,6 +197,14 @@ const styles = StyleSheet.create({
   },
   newBtn: { paddingHorizontal: 10, paddingVertical: 2, marginLeft: 6 },
   detail: { flex: 1 },
+  detailBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   empty: { textAlign: 'center', lineHeight: 24 },
   headerBtn: { paddingHorizontal: 10, paddingVertical: 6 },
