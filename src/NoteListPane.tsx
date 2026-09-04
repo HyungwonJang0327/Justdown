@@ -78,6 +78,20 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
         keyExtractor={(n) => n.id}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={filtered.length === 0 && styles.emptyWrap}
+        // 웹: FlatList 셀 래퍼가 z-index:0 stacking context 라 행에 zIndex 를 줘도
+        // 다음 셀이 팝오버를 덮는다. 메뉴가 열린 "셀"을 직접 끌어올린다.
+        CellRendererComponent={
+          Platform.OS === 'web'
+            ? ({ index, children, style, ...props }) => (
+                <View
+                  {...props}
+                  style={[style, filtered[index]?.id === menuId && styles.rowMenuOpen]}
+                >
+                  {children}
+                </View>
+              )
+            : undefined
+        }
         ListEmptyComponent={
           <Text style={[styles.empty, { color: colors.subText }]}>
             {q ? t('noSearchResults') : t('emptyList')}
@@ -91,7 +105,6 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
               <TouchableOpacity
                 style={[
                   styles.row,
-                  menuId === item.id && styles.rowMenuOpen,
                   {
                     borderBottomColor: colors.border,
                     backgroundColor: selected ? colors.card : colors.bg,
