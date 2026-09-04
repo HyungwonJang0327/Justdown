@@ -135,9 +135,19 @@ describe('renderMarkdownDocument (WebView 용 완전한 문서)', () => {
     expect(doc).toContain('window.__find');
   });
 
-  test('테마에 따라 배경색이 달라진다', () => {
-    expect(renderMarkdownDocument('x', 'light')).toContain('background: #ffffff');
-    expect(renderMarkdownDocument('x', 'dark')).toContain('background: #151515');
+  test('배경색은 CSS 변수로 정의되어 양 테마가 한 문서에 공존한다', () => {
+    const doc = renderMarkdownDocument('x', 'light');
+    expect(doc).toContain('--bg: #ffffff');
+    expect(doc).toContain('--bg: #151515');
+  });
+
+  test('테마는 html 클래스로만 반영된다 (전환 시 문서 재생성이 필요 없도록)', () => {
+    const light = renderMarkdownDocument('x', 'light');
+    const dark = renderMarkdownDocument('x', 'dark');
+    expect(light).toContain('window.__setTheme');
+    expect(dark).toContain('<html lang="ja" class="dark">');
+    // 초기 클래스 말고는 완전히 동일해야 테마 전환이 리로드를 유발하지 않는다
+    expect(dark.replace(' class="dark"', '')).toBe(light);
   });
 });
 

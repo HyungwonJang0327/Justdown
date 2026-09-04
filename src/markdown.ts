@@ -134,15 +134,17 @@ export function renderMarkdownBody(markdown: string): string {
   return md.render(markdown ?? '');
 }
 
-/** WebView 에 주입할 완전한 HTML 문서를 생성한다 (테마 CSS 포함). */
+/** WebView 에 주입할 완전한 HTML 문서를 생성한다.
+ *  테마는 html 클래스로만 반영 — CSS 는 양 테마를 모두 포함하므로
+ *  __setTheme 호출만으로 문서 재생성(리로드·스크롤 소실) 없이 전환된다. */
 export function renderMarkdownDocument(markdown: string, theme: ThemeName): string {
   const body = renderMarkdownBody(markdown);
   return `<!DOCTYPE html>
-<html lang="ja">
+<html lang="ja"${theme === 'dark' ? ' class="dark"' : ''}>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<style>${baseCss(theme)}</style>
+<style>${baseCss()}</style>
 </head>
 <body>
 <article class="md">
@@ -150,6 +152,10 @@ ${body}
 </article>
 <script>
 (function () {
+  // 테마 전환: 클래스만 바꾸므로 스크롤 위치가 유지된다
+  window.__setTheme = function (t) {
+    document.documentElement.classList.toggle('dark', t === 'dark');
+  };
   // 프리뷰 내 찾기: 텍스트 노드를 걸어 매치를 <mark>로 감싸고 index번째로 스크롤.
   // RN 쪽에서 injectJavaScript로 호출하고, 매치 수는 postMessage로 돌려준다.
   window.__find = function (query, index) {
@@ -205,23 +211,24 @@ ${body}
 </html>`;
 }
 
-function baseCss(theme: ThemeName): string {
-  const dark = theme === 'dark';
-  const fg = dark ? '#e6e6e6' : '#1a1a1a';
-  const bg = dark ? '#151515' : '#ffffff';
-  const muted = dark ? '#9aa0a6' : '#6a737d';
-  const border = dark ? '#333' : '#e1e4e8';
-  const codeBg = dark ? '#1e1e1e' : '#f6f8fa';
-  const linkColor = dark ? '#5aa9ff' : '#0366d6';
-  const rtColor = dark ? '#bcc2c9' : '#555';
-
+function baseCss(): string {
   return `
+  :root {
+    --fg: #1a1a1a; --bg: #ffffff; --muted: #6a737d; --border: #e1e4e8;
+    --code-bg: #f6f8fa; --link: #0366d6; --rt: #555;
+    --find-bg: #ffe58f; --find-cur-bg: #ffb84d;
+  }
+  html.dark {
+    --fg: #e6e6e6; --bg: #151515; --muted: #9aa0a6; --border: #333;
+    --code-bg: #1e1e1e; --link: #5aa9ff; --rt: #bcc2c9;
+    --find-bg: #5c4a00; --find-cur-bg: #b8860b;
+  }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
-    background: ${bg};
-    color: ${fg};
+    background: var(--bg);
+    color: var(--fg);
     -webkit-text-size-adjust: 100%;
   }
   .md {
@@ -233,37 +240,37 @@ function baseCss(theme: ThemeName): string {
     overflow-wrap: anywhere;
   }
   .md h1, .md h2, .md h3, .md h4 { line-height: 1.35; margin: 1.4em 0 0.6em; font-weight: 700; }
-  .md h1 { font-size: 1.7em; border-bottom: 1px solid ${border}; padding-bottom: 0.3em; }
-  .md h2 { font-size: 1.4em; border-bottom: 1px solid ${border}; padding-bottom: 0.3em; }
+  .md h1 { font-size: 1.7em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+  .md h2 { font-size: 1.4em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
   .md h3 { font-size: 1.2em; }
   .md h4 { font-size: 1.05em; }
   .md p { margin: 0.7em 0; }
-  .md a { color: ${linkColor}; text-decoration: none; }
+  .md a { color: var(--link); text-decoration: none; }
   .md blockquote {
     margin: 0.8em 0;
     padding: 0.2em 1em;
-    color: ${muted};
-    border-left: 4px solid ${border};
+    color: var(--muted);
+    border-left: 4px solid var(--border);
   }
   .md ul, .md ol { padding-left: 1.5em; margin: 0.6em 0; }
   .md li { margin: 0.2em 0; }
-  .md hr { border: none; border-top: 1px solid ${border}; margin: 1.5em 0; }
+  .md hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
   .md img { max-width: 100%; height: auto; }
   .md table { border-collapse: collapse; margin: 0.8em 0; display: block; overflow-x: auto; }
-  .md th, .md td { border: 1px solid ${border}; padding: 6px 12px; }
-  .md th { background: ${codeBg}; }
+  .md th, .md td { border: 1px solid var(--border); padding: 6px 12px; }
+  .md th { background: var(--code-bg); }
 
   /* inline code */
   .md code {
     font-family: "SF Mono", ui-monospace, Menlo, monospace;
     font-size: 0.9em;
-    background: ${codeBg};
+    background: var(--code-bg);
     padding: 0.15em 0.4em;
     border-radius: 5px;
   }
   /* code block */
   .md pre {
-    background: ${codeBg};
+    background: var(--code-bg);
     padding: 12px 14px;
     border-radius: 8px;
     overflow-x: auto;
@@ -272,20 +279,21 @@ function baseCss(theme: ThemeName): string {
   .md pre code { background: transparent; padding: 0; font-size: 0.85em; }
 
   /* 프리뷰 내 찾기 하이라이트 */
-  mark.__find { background: ${dark ? '#5c4a00' : '#ffe58f'}; color: inherit; border-radius: 3px; padding: 0 1px; }
-  mark.__find.__cur { background: ${dark ? '#b8860b' : '#ffb84d'}; }
+  mark.__find { background: var(--find-bg); color: inherit; border-radius: 3px; padding: 0 1px; }
+  mark.__find.__cur { background: var(--find-cur-bg); }
 
   /* ruby / furigana */
   .md ruby { ruby-align: center; }
   .md rt {
     font-size: 0.55em;
-    color: ${rtColor};
+    color: var(--rt);
     line-height: 1;
     user-select: none;
   }
 
   /* highlight.js token colors (github light/dark 간소화 버전) */
-  ${dark ? hljsDarkCss() : hljsLightCss()}
+  ${hljsLightCss()}
+  ${hljsDarkCss()}
   `;
 }
 
@@ -306,17 +314,16 @@ function hljsLightCss(): string {
 }
 
 function hljsDarkCss(): string {
+  // html.dark 스코프 — 라이트 규칙 뒤에 함께 포함되므로 프리픽스가 필수
   return `
-  .hljs-comment, .hljs-quote { color: #8b949e; font-style: italic; }
-  .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-type { color: #ff7b72; }
-  .hljs-string, .hljs-attr, .hljs-regexp, .hljs-addition { color: #a5d6ff; }
-  .hljs-number, .hljs-built_in, .hljs-builtin-name { color: #79c0ff; }
-  .hljs-title, .hljs-section, .hljs-function .hljs-title { color: #d2a8ff; }
-  .hljs-name, .hljs-tag { color: #7ee787; }
-  .hljs-attribute { color: #79c0ff; }
-  .hljs-variable, .hljs-template-variable { color: #ffa657; }
-  .hljs-deletion { color: #ffdcd7; }
-  .hljs-emphasis { font-style: italic; }
-  .hljs-strong { font-weight: bold; }
+  html.dark .hljs-comment, html.dark .hljs-quote { color: #8b949e; font-style: italic; }
+  html.dark .hljs-keyword, html.dark .hljs-selector-tag, html.dark .hljs-literal, html.dark .hljs-type { color: #ff7b72; }
+  html.dark .hljs-string, html.dark .hljs-attr, html.dark .hljs-regexp, html.dark .hljs-addition { color: #a5d6ff; }
+  html.dark .hljs-number, html.dark .hljs-built_in, html.dark .hljs-builtin-name { color: #79c0ff; }
+  html.dark .hljs-title, html.dark .hljs-section, html.dark .hljs-function .hljs-title { color: #d2a8ff; }
+  html.dark .hljs-name, html.dark .hljs-tag { color: #7ee787; }
+  html.dark .hljs-attribute { color: #79c0ff; }
+  html.dark .hljs-variable, html.dark .hljs-template-variable { color: #ffa657; }
+  html.dark .hljs-deletion { color: #ffdcd7; }
   `;
 }

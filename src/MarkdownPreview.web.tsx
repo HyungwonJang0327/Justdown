@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { renderMarkdownDocument } from './markdown';
 import type { MarkdownPreviewProps } from './MarkdownPreviewTypes';
 
 /** 문서 스크립트(markdown.ts)가 iframe window에 노출하는 API */
-type PreviewWindow = Window & { __find?: (query: string, index: number) => void };
+type PreviewWindow = Window & {
+  __find?: (query: string, index: number) => void;
+  __setTheme?: (theme: string) => void;
+};
 
 /** 웹 프리뷰: srcdoc iframe. 같은 HTML 문서를 재사용하고 __find를 직접 호출한다. */
 export default function MarkdownPreview({
@@ -16,6 +19,14 @@ export default function MarkdownPreview({
   ref,
 }: MarkdownPreviewProps) {
   const frameRef = useRef<HTMLIFrameElement>(null);
+
+  // 테마는 마운트 시점 문서에만 굽는다. 이후 전환은 __setTheme 로 클래스만
+  // 바꿔야 srcdoc 재생성(=iframe 리로드=스크롤 소실)이 일어나지 않는다.
+  const [initialTheme] = useState(theme);
+  const doc = useMemo(() => renderMarkdownDocument(content, initialTheme), [content, initialTheme]);
+  useEffect(() => {
+    (frameRef.current?.contentWindow as PreviewWindow | null | undefined)?.__setTheme?.(theme);
+  }, [theme]);
 
   const runFind = useCallback(
     (query: string, index: number) => {
@@ -44,7 +55,7 @@ export default function MarkdownPreview({
     <iframe
       ref={frameRef}
       title="preview"
-      srcDoc={renderMarkdownDocument(content, theme)}
+      srcDoc={doc}
       style={{ flex: 1, width: '100%', border: 'none', backgroundColor }}
       onLoad={() => {
         // 노트 속 링크는 새 탭으로 열고, iframe 자체가 이동하는 것은 차단
@@ -56,7 +67,8 @@ export default function MarkdownPreview({
             window.open(anchor.href, '_blank', 'noopener');
           }
         });
-        // srcdoc 변경 시 재로드되므로 찾기 상태를 다시 적용
+        // srcdoc 변경 시 재로드되므로 테마·찾기 상태를 다시 적용
+        (frameRef.current?.contentWindow as PreviewWindow | null | undefined)?.__setTheme?.(theme);
         if (findQuery) runFind(findQuery, findIndex);
       }}
     />
