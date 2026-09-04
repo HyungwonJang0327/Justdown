@@ -81,8 +81,10 @@ export default function TwoPaneScreen({ navigation }: Props) {
         e.preventDefault(); // 자동 저장이 있으므로 브라우저 저장 다이얼로그만 막는다
       }
     };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    // capture: react-native-web TextInput 이 keydown 을 stopPropagation 하므로
+    // bubble 로는 에디터 포커스 중 단축키가 document 까지 오지 않는다
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
   }, [createNote, selectedId]);
 
   // 헤더에는 제목·테마 토글(맨 오른쪽)만. 편집 컨트롤은 오른쪽 pane 상단 바에 둔다

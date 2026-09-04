@@ -198,8 +198,10 @@ export default function NoteEditPane({
         inputRef.current?.focus();
       }
     };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    // capture: react-native-web TextInput 이 keydown 을 stopPropagation 하므로
+    // bubble 로는 에디터 포커스 중 ⌘K 가 document 까지 오지 않는다
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
   }, [tab]);
 
   // 언마운트(화면 이탈·노트 전환) 시 미저장 변경만 즉시 저장.
