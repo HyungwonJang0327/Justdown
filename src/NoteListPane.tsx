@@ -29,6 +29,19 @@ interface Props {
 export default function NoteListPane({ query, selectedId, onSelect, refreshToken }: Props) {
   const { colors } = useTheme();
   const [notes, setNotes] = useState<Note[]>([]);
+  // ⋯ 메뉴가 열려 있는 노트 id (웹 전용)
+  const [menuId, setMenuId] = useState<string | null>(null);
+
+  // 메뉴 밖 아무 곳이나 클릭하면 닫기. 리스너는 메뉴가 열린 뒤(이펙트 시점)에
+  // 등록되므로 메뉴를 연 클릭 자체로는 닫히지 않고, 다른 ⋯ 클릭으로 메뉴를
+  // 옮길 때는 functional update 가 id 비교로 새 메뉴를 보존한다.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || menuId == null) return;
+    const openedId = menuId;
+    const close = () => setMenuId((cur) => (cur === openedId ? null : cur));
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [menuId]);
 
   useEffect(() => {
     loadNotes().then(setNotes);
@@ -74,26 +87,20 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
           const title = cleanHeadingText(noteTitle(item.content)) || '(제목 없음)';
           const sub = preview(item.content);
           const selected = item.id === selectedId;
-          return (
-            <Swipeable
-              renderRightActions={() => (
-                <TouchableOpacity
-                  style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
-                  onPress={() => removeNote(item.id)}
-                >
-                  <Text style={styles.deleteActionText}>삭제</Text>
-                </TouchableOpacity>
-              )}
-            >
+          const row = (
               <TouchableOpacity
                 style={[
                   styles.row,
+                  menuId === item.id && styles.rowMenuOpen,
                   {
                     borderBottomColor: colors.border,
                     backgroundColor: selected ? colors.card : colors.bg,
                   },
                 ]}
-                onPress={() => onSelect(item.id)}
+                onPress={() => {
+                  setMenuId(null);
+                  onSelect(item.id);
+                }}
                 onLongPress={() => confirmDelete(item.id)}
               >
                 <View style={styles.rowBody}>
@@ -106,16 +113,50 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
                     </Text>
                   )}
                 </View>
-                {/* 웹은 스와이프·롱프레스 발견성이 낮아 삭제 버튼을 노출 */}
+                {/* 웹은 스와이프·롱프레스 발견성이 낮아 행 메뉴(⋯)를 노출 */}
                 {Platform.OS === 'web' && (
                   <TouchableOpacity
-                    onPress={() => confirmDelete(item.id)}
-                    style={styles.rowDelete}
+                    onPress={() => setMenuId((cur) => (cur === item.id ? null : item.id))}
+                    style={styles.rowMenuBtn}
                   >
-                    <Text style={{ color: colors.subText, fontSize: 15 }}>✕</Text>
+                    <Text style={{ color: colors.subText, fontSize: 17 }}>⋯</Text>
                   </TouchableOpacity>
                 )}
+                {menuId === item.id && (
+                  <View
+                    style={[
+                      styles.rowMenu,
+                      { backgroundColor: colors.card, borderColor: colors.border },
+                    ]}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        setMenuId(null);
+                        confirmDelete(item.id);
+                      }}
+                      style={styles.rowMenuItem}
+                    >
+                      <Text style={{ color: colors.destructive, fontSize: 15 }}>삭제</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </TouchableOpacity>
+          );
+          // 웹은 ⋯ 메뉴로 삭제하므로 Swipeable 불필요
+          // (Swipeable 의 overflow:hidden 이 메뉴 팝오버를 잘라내는 문제도 함께 회피)
+          if (Platform.OS === 'web') return row;
+          return (
+            <Swipeable
+              renderRightActions={() => (
+                <TouchableOpacity
+                  style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
+                  onPress={() => removeNote(item.id)}
+                >
+                  <Text style={styles.deleteActionText}>삭제</Text>
+                </TouchableOpacity>
+              )}
+            >
+              {row}
             </Swipeable>
           );
         }}
@@ -136,7 +177,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   rowBody: { flex: 1 },
-  rowDelete: { paddingHorizontal: 8, paddingVertical: 6, marginLeft: 4 },
+  rowMenuBtn: { paddingHorizontal: 8, paddingVertical: 6, marginLeft: 4 },
+  rowMenuOpen: { zIndex: 10 }, // 메뉴가 다음 행에 가려지지 않게
+  rowMenu: {
+    position: 'absolute',
+    top: '70%',
+    right: 14,
+    zIndex: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 8,
+    paddingVertical: 4,
+    minWidth: 100,
+  },
+  rowMenuItem: { paddingVertical: 8, paddingHorizontal: 14 },
   title: { fontSize: 17, fontWeight: '600' },
   sub: { fontSize: 14, marginTop: 3 },
   deleteAction: {
