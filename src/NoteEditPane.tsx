@@ -182,6 +182,24 @@ export default function NoteEditPane({
     selRef.current = { start: caret, end: caret };
     setPendingSel({ start: caret, end: caret });
   };
+  const insertRef = useRef(insert);
+  useEffect(() => {
+    insertRef.current = insert;
+  });
+
+  // ⌘K: 후리가나 괄호 《》 삽입 (웹 전용, Code 탭에서만)
+  useEffect(() => {
+    if (Platform.OS !== 'web' || tab !== 'code') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        insertRef.current('《》', 1);
+        inputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [tab]);
 
   // 언마운트(화면 이탈·노트 전환) 시 미저장 변경만 즉시 저장.
   // saveTimer 가 걸려 있다 = 디바운스가 아직 안 끝난 입력이 있다는 뜻.
