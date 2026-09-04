@@ -1,5 +1,12 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import NoteListPane from './NoteListPane';
 import NoteEditPane, { type Tab } from './NoteEditPane';
@@ -9,11 +16,17 @@ import type { RootStackParamList } from './navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Split'>;
 
-const SIDEBAR_WIDTH = 300;
+/** 창 너비 구간별 사이드바 폭 (좁을수록 본문 공간 우선) */
+function sidebarWidth(windowWidth: number): number {
+  if (windowWidth >= 1400) return 400;
+  if (windowWidth >= 1000) return 340;
+  return 300;
+}
 
 /** 와이드(데스크톱·태블릿) 모드: 왼쪽 노트 목록 사이드바 + 오른쪽 편집 pane */
 export default function TwoPaneScreen({ navigation }: Props) {
   const { colors, theme, toggle } = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
 
   const [query, setQuery] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
@@ -85,7 +98,9 @@ export default function TwoPaneScreen({ navigation }: Props) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.sidebar, { borderRightColor: colors.border }]}>
+      <View
+        style={[styles.sidebar, { width: sidebarWidth(windowWidth), borderRightColor: colors.border }]}
+      >
         <View style={[styles.sidebarTop, { borderBottomColor: colors.border }]}>
           <TextInput
             style={[
@@ -141,7 +156,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, flexDirection: 'row' },
-  sidebar: { width: SIDEBAR_WIDTH, borderRightWidth: StyleSheet.hairlineWidth },
+  sidebar: { borderRightWidth: StyleSheet.hairlineWidth },
   sidebarTop: {
     flexDirection: 'row',
     alignItems: 'center',
