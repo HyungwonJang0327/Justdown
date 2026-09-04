@@ -1,5 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { deleteNote, loadNote, loadNotes, saveNote, type Note } from '../storage';
+import {
+  deleteNote,
+  loadNote,
+  loadNotes,
+  loadTheme,
+  noteTitle,
+  saveNote,
+  saveTheme,
+  type Note,
+} from '../storage';
 
 beforeEach(() => AsyncStorage.clear());
 
@@ -66,6 +75,45 @@ describe('loadNote', () => {
     await deleteNote('a');
 
     expect(await loadNote('a')).toBeNull();
+  });
+
+  test('손상된 항목은 null 을 반환한다', async () => {
+    await AsyncStorage.setItem('justdown.note.x', 'not-json');
+
+    expect(await loadNote('x')).toBeNull();
+  });
+});
+
+describe('loadTheme / saveTheme', () => {
+  test('저장된 값이 없으면 light 를 반환한다', async () => {
+    expect(await loadTheme()).toBe('light');
+  });
+
+  test('저장한 테마를 반환한다', async () => {
+    await saveTheme('dark');
+
+    expect(await loadTheme()).toBe('dark');
+  });
+
+  test('알 수 없는 값은 light 로 처리한다', async () => {
+    await AsyncStorage.setItem('justdown.theme', 'neon');
+
+    expect(await loadTheme()).toBe('light');
+  });
+});
+
+describe('noteTitle', () => {
+  test('첫 비어있지 않은 줄을 # 마크업 없이 제목으로 쓴다', () => {
+    expect(noteTitle('# 面接《めんせつ》\n本文')).toBe('面接《めんせつ》');
+  });
+
+  test('앞의 빈 줄·공백 줄은 건너뛴다', () => {
+    expect(noteTitle('\n   \nメモ')).toBe('メモ');
+  });
+
+  test('내용이 전부 비어 있으면 빈 문자열을 반환한다', () => {
+    expect(noteTitle('')).toBe('');
+    expect(noteTitle('\n  \n')).toBe('');
   });
 });
 
