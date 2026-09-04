@@ -39,10 +39,10 @@ export default function NoteListScreen({ navigation }: Props) {
     }, [])
   );
 
-  const createNote = () => {
+  const createNote = useCallback(() => {
     const id = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
     navigation.navigate('NoteEdit', { id, isNew: true });
-  };
+  }, [navigation]);
 
   // iOS 네이티브 헤더 검색바 + 헤더 버튼.
   // iOS 26+에서 검색 필드가 화면 하단에 상주하므로, 새 노트/테마 버튼은
@@ -69,7 +69,7 @@ export default function NoteListScreen({ navigation }: Props) {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, theme, colors, toggle]);
+  }, [navigation, theme, colors, toggle, createNote]);
 
   // 제목은 content 첫 줄에서 파생되므로 content 검색이 제목 검색을 포함한다
   const q = query.trim().toLowerCase();

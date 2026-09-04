@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   InputAccessoryView,
   KeyboardAvoidingView,
@@ -21,6 +21,9 @@ import type { RootStackParamList } from './navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NoteEdit'>;
 type Tab = 'code' | 'preview';
+
+// InputAccessoryView nativeID 발급용 시퀀스 (마운트마다 새 값)
+let nextToolbarSeq = 0;
 
 // 키보드 위 툴바 버튼: label = 표시, snippet = 삽입 문자열, caretBack = 삽입 후 커서를 뒤로 당길 칸 수
 const TOOLBAR: { label: string; snippet: string; caretBack: number }[] = [
@@ -51,7 +54,7 @@ export default function NoteEditScreen({ route, navigation }: Props) {
 
   // InputAccessoryView nativeID는 화면 인스턴스마다 유니크해야 함.
   // 고정 문자열이면 화면 재마운트 시 이전 등록과 충돌해 툴바가 안 붙는다.
-  const accessoryId = useRef(`justdown-toolbar-${Math.random().toString(36).slice(2)}`).current;
+  const [accessoryId] = useState(() => `justdown-toolbar-${nextToolbarSeq++}`);
 
   // 노트 내 찾기
   const inputRef = useRef<TextInput>(null);
@@ -133,18 +136,21 @@ export default function NoteEditScreen({ route, navigation }: Props) {
   }, [id]);
 
   // 자동 저장 (디바운스)
-  const persist = (text: string) => {
-    if (text.trim().length === 0) {
-      // 빈 노트는 저장하지 않음 (기존에 있었다면 제거)
-      if (existedRef.current) {
-        existedRef.current = false;
-        deleteNote(id);
+  const persist = useCallback(
+    (text: string) => {
+      if (text.trim().length === 0) {
+        // 빈 노트는 저장하지 않음 (기존에 있었다면 제거)
+        if (existedRef.current) {
+          existedRef.current = false;
+          deleteNote(id);
+        }
+      } else {
+        existedRef.current = true;
+        saveNote({ id, content: text, updatedAt: Date.now() });
       }
-    } else {
-      existedRef.current = true;
-      saveNote({ id, content: text, updatedAt: Date.now() });
-    }
-  };
+    },
+    [id]
+  );
 
   const onChange = (text: string) => {
     setContent(text);
@@ -168,7 +174,7 @@ export default function NoteEditScreen({ route, navigation }: Props) {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       persist(content);
     });
-  }, [navigation, content]);
+  }, [navigation, content, persist]);
 
   // 상단 탭을 헤더에 배치
   useLayoutEffect(() => {
