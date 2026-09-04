@@ -44,6 +44,17 @@ describe('deleteNote (소프트 삭제)', () => {
     expect(notes.map((n) => n.id)).toEqual(['a']);
   });
 
+  test('삭제된 노트는 saveNote(자동 저장)로 부활하지 않는다', async () => {
+    await saveNote({ id: 'a', content: 'x', updatedAt: 1000 });
+    await deleteNote('a');
+
+    // 삭제 직후 에디터 unmount flush 가 저장을 시도하는 시나리오
+    await saveNote({ id: 'a', content: 'x 수정', updatedAt: 2000 });
+
+    expect(await loadNote('a')).toBeNull();
+    expect(await loadNotes()).toEqual([]);
+  });
+
   test('삭제해도 저장소에는 tombstone(deletedAt, 빈 content)이 남는다', async () => {
     await saveNote({ id: 'b', content: 'remove', updatedAt: 2000 });
 

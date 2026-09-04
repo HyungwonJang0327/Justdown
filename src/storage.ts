@@ -65,6 +65,15 @@ export async function loadNote(id: string): Promise<Note | null> {
 }
 
 export async function saveNote(note: Note): Promise<void> {
+  // 삭제된 노트(tombstone)는 자동 저장(unmount flush 등)으로 부활하지 않는다
+  const raw = await AsyncStorage.getItem(noteKey(note.id));
+  if (raw) {
+    try {
+      if ((JSON.parse(raw) as Note).deletedAt != null) return;
+    } catch {
+      // 손상된 항목은 덮어쓴다
+    }
+  }
   await AsyncStorage.setItem(noteKey(note.id), JSON.stringify(note));
 }
 
