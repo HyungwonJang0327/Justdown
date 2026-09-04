@@ -3,6 +3,7 @@ import { Alert, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } f
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteNote as deleteNoteInStorage, loadNotes, noteTitle, type Note } from './storage';
 import { cleanHeadingText } from './markdown';
+import { t } from './i18n';
 import { useTheme } from './theme';
 
 function preview(content: string): string {
@@ -60,12 +61,12 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
   const confirmDelete = (id: string) => {
     // react-native-web 의 Alert 는 no-op — 웹은 브라우저 confirm 사용
     if (Platform.OS === 'web') {
-      if (window.confirm('이 노트를 삭제할까요?')) removeNote(id);
+      if (window.confirm(t('deleteConfirm'))) removeNote(id);
       return;
     }
-    Alert.alert('삭제', '이 노트를 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      { text: '삭제', style: 'destructive', onPress: () => removeNote(id) },
+    Alert.alert(t('delete'), t('deleteConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('delete'), style: 'destructive', onPress: () => removeNote(id) },
     ]);
   };
 
@@ -78,13 +79,11 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
         contentContainerStyle={filtered.length === 0 && styles.emptyWrap}
         ListEmptyComponent={
           <Text style={[styles.empty, { color: colors.subText }]}>
-            {q
-              ? '검색 결과가 없습니다.'
-              : '노트가 없습니다.\n오른쪽 위 + 버튼으로 새 노트를 만드세요.'}
+            {q ? t('noSearchResults') : t('emptyList')}
           </Text>
         }
         renderItem={({ item }) => {
-          const title = cleanHeadingText(noteTitle(item.content)) || '(제목 없음)';
+          const title = cleanHeadingText(noteTitle(item.content)) || t('untitled');
           const sub = preview(item.content);
           const selected = item.id === selectedId;
           const row = (
@@ -136,7 +135,7 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
                       }}
                       style={styles.rowMenuItem}
                     >
-                      <Text style={{ color: colors.destructive, fontSize: 15 }}>삭제</Text>
+                      <Text style={{ color: colors.destructive, fontSize: 15 }}>{t('delete')}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -152,7 +151,7 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
                   style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
                   onPress={() => removeNote(item.id)}
                 >
-                  <Text style={styles.deleteActionText}>삭제</Text>
+                  <Text style={styles.deleteActionText}>{t('delete')}</Text>
                 </TouchableOpacity>
               )}
             >

@@ -15,6 +15,7 @@ import { deleteNote, loadNote, saveNote } from './storage';
 import { extractHeadings, type Heading } from './markdown';
 import MarkdownPreview from './MarkdownPreview';
 import type { MarkdownPreviewHandle } from './MarkdownPreviewTypes';
+import { t } from './i18n';
 import { useTheme } from './theme';
 
 export type Tab = 'code' | 'preview';
@@ -254,7 +255,7 @@ export default function NoteEditPane({
               setFindQuery(t);
               setFindIndex(0);
             }}
-            placeholder="찾기"
+            placeholder={t('find')}
             placeholderTextColor={colors.subText}
             autoCapitalize="none"
             autoCorrect={false}
@@ -293,7 +294,7 @@ export default function NoteEditPane({
           if (pendingSel) setPendingSel(undefined);
         }}
         inputAccessoryViewID={accessoryId}
-        placeholder={'# 제목\n\n漢字《かんじ》 처럼 후리가나를 넣을 수 있어요.\n키보드 위 《 》 버튼을 눌러보세요.'}
+        placeholder={t('editorPlaceholder')}
         placeholderTextColor={colors.subText}
         multiline
         autoCapitalize="none"
@@ -325,7 +326,7 @@ export default function NoteEditPane({
             <ScrollView>
               {headings.length === 0 ? (
                 <Text style={[styles.tocEmpty, { color: colors.subText }]}>
-                  헤딩(#)이 없습니다.
+                  {t('noHeadings')}
                 </Text>
               ) : (
                 headings.map((h, i) => (

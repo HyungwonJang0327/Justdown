@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import NoteListPane from './NoteListPane';
+import { t } from './i18n';
 import { useTheme } from './theme';
 import type { RootStackParamList } from './navigation';
 
@@ -31,8 +32,8 @@ export default function NoteListScreen({ navigation }: Props) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        placeholder: '검색',
-        cancelButtonText: '취소',
+        placeholder: t('search'),
+        cancelButtonText: t('cancel'),
         hideWhenScrolling: false,
         onChangeText: (e) => setQuery(e.nativeEvent.text),
         onCancelButtonPress: () => setQuery(''),

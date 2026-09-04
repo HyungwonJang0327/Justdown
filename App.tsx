@@ -9,6 +9,7 @@ import NoteListScreen from './src/NoteListScreen';
 import NoteEditScreen from './src/NoteEditScreen';
 import TwoPaneScreen from './src/TwoPaneScreen';
 import { loadTheme, saveTheme } from './src/storage';
+import { t } from './src/i18n';
 import { ThemeContext, colorsFor, type ThemeName } from './src/theme';
 import type { RootStackParamList } from './src/navigation';
 
@@ -76,7 +77,7 @@ export default function App() {
                 <Stack.Screen
                   name="NoteEdit"
                   component={NoteEditScreen}
-                  options={{ title: '', headerBackTitle: '목록' }}
+                  options={{ title: '', headerBackTitle: t('backToList') }}
                 />
               </>
             )}

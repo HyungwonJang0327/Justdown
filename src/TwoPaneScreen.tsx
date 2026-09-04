@@ -12,6 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import NoteListPane from './NoteListPane';
 import NoteEditPane, { type Tab } from './NoteEditPane';
 import { EditHeaderButtons, EditTabs } from './EditHeader';
+import { t } from './i18n';
 import { useTheme } from './theme';
 import type { RootStackParamList } from './navigation';
 
@@ -108,7 +109,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
             ]}
             value={query}
             onChangeText={setQuery}
-            placeholder="검색"
+            placeholder={t('search')}
             placeholderTextColor={colors.subText}
             autoCapitalize="none"
             autoCorrect={false}
@@ -168,7 +169,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
         ) : (
           <View style={styles.emptyWrap}>
             <Text style={[styles.empty, { color: colors.subText }]}>
-              {'노트를 선택하거나\n＋ 버튼으로 새 노트를 만드세요.'}
+              {t('selectNote')}
             </Text>
           </View>
         )}
