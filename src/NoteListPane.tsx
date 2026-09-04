@@ -59,9 +59,10 @@ export default function NoteListPane({ query, selectedId, onSelect, refreshToken
   };
 
   const confirmDelete = (id: string) => {
-    // react-native-web 의 Alert 는 no-op — 웹은 브라우저 confirm 사용
+    // 웹은 ⋯ 메뉴를 거치는 2단계 조작이라 즉시 삭제 (스와이프 삭제와 동일 관례).
+    // Tauri(WKWebView)는 window.confirm 이 no-op 이라 confirm 기반 확인은 불가.
     if (Platform.OS === 'web') {
-      if (window.confirm(t('deleteConfirm'))) removeNote(id);
+      removeNote(id);
       return;
     }
     Alert.alert(t('delete'), t('deleteConfirm'), [
