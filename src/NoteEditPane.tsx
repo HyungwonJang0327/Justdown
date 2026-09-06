@@ -310,6 +310,9 @@ export default function NoteEditPane({
           selRef.current = e.nativeEvent.selection;
           if (pendingSel) setPendingSel(undefined);
         }}
+        // 로드 완료 전 입력 금지: 빈 값으로 즉시 마운트되는 구조라, 로드 전에
+        // 타이핑하면 그 몇 글자로 디바운스 저장이 걸려 기존 본문을 덮어쓴다
+        editable={loaded}
         inputAccessoryViewID={accessoryId}
         placeholder={t('editorPlaceholder')}
         placeholderTextColor={colors.subText}
