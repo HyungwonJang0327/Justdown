@@ -76,7 +76,10 @@ export default function NoteEditPane({
 
   // InputAccessoryView nativeID는 화면 인스턴스마다 유니크해야 함.
   // 고정 문자열이면 화면 재마운트 시 이전 등록과 충돌해 툴바가 안 붙는다.
-  const [accessoryId] = useState(() => `justdown-toolbar-${nextToolbarSeq++}`);
+  // 테마도 포함: 테마 전환 시 TextInput을 재마운트하는데(아래 key={theme} 참고),
+  // 액세서리도 같은 커밋에 재마운트·재등록되어야 연결이 유지된다.
+  const [accessorySeq] = useState(() => nextToolbarSeq++);
+  const accessoryId = `justdown-toolbar-${accessorySeq}-${theme}`;
 
   // 노트 내 찾기
   const inputRef = useRef<TextInput>(null);
@@ -286,6 +289,11 @@ export default function NoteEditPane({
           그래서 로드 완료를 기다리지 않고 빈 값으로 즉시 마운트하고, 내용은 나중에 채운다.
           탭 전환 시에도 언마운트하지 않고 숨김만 한다 (재마운트 시 연결이 끊김). */}
       <TextInput
+        // key={theme}: iOS multiline TextInput은 color 스타일 변경을 기존 텍스트에
+        // 적용하지 않는다 (facebook/react-native#31569). 2-pane에서 노트가 열린 채
+        // 테마를 토글하면 글자색이 옛 테마 색으로 남아 안 보이므로 재마운트로 강제 적용.
+        // 액세서리 툴바는 accessoryId에 테마가 포함되어 같은 커밋에 함께 재마운트된다.
+        key={theme}
         ref={inputRef}
         style={[styles.input, { color: colors.text }, tab !== 'code' && styles.hidden]}
         value={content}
@@ -353,7 +361,7 @@ export default function NoteEditPane({
 
       {/* InputAccessoryView는 iOS 전용 (웹/안드로이드에서는 렌더하지 않음) */}
       {Platform.OS === 'ios' && (
-        <InputAccessoryView nativeID={accessoryId}>{toolbar}</InputAccessoryView>
+        <InputAccessoryView key={accessoryId} nativeID={accessoryId}>{toolbar}</InputAccessoryView>
       )}
     </KeyboardAvoidingView>
   );
