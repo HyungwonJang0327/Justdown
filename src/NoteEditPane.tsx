@@ -62,6 +62,8 @@ export default function NoteEditPane({
   const [content, setContent] = useState('');
   const [loaded, setLoaded] = useState(isNew);
   const existedRef = useRef(false);
+  // 이 에디터가 내용을 비워서 스스로 삭제(tombstone)한 상태 — 재입력 시 resurrect 저장
+  const selfDeletedRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentRef = useRef('');
   useEffect(() => {
@@ -157,11 +159,16 @@ export default function NoteEditPane({
         // 빈 노트는 저장하지 않음 (기존에 있었다면 제거)
         if (existedRef.current) {
           existedRef.current = false;
+          selfDeletedRef.current = true;
           deleteNote(id);
         }
       } else {
         existedRef.current = true;
-        saveNote({ id, content: text, updatedAt: Date.now() });
+        // 스스로 지운 뒤의 재입력만 부활 허용 — 외부 삭제(목록 스와이프) 후
+        // 늦게 발화한 flush 는 여전히 saveNote 의 tombstone 가드에 막힌다
+        const resurrect = selfDeletedRef.current;
+        selfDeletedRef.current = false;
+        saveNote({ id, content: text, updatedAt: Date.now() }, resurrect ? { resurrect } : undefined);
       }
       onSaved?.();
     },

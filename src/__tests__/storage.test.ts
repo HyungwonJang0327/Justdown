@@ -55,6 +55,17 @@ describe('deleteNote (소프트 삭제)', () => {
     expect(await loadNotes()).toEqual([]);
   });
 
+  test('resurrect 옵션이면 tombstone 위에 저장된다 (비운 노트에 다시 타이핑)', async () => {
+    await saveNote({ id: 'a', content: 'x', updatedAt: 1000 });
+    await deleteNote('a'); // 에디터가 내용을 비워서 스스로 tombstone 을 만든 상황
+
+    const revived: Note = { id: 'a', content: '다시 쓴 내용', updatedAt: 2000 };
+    await saveNote(revived, { resurrect: true });
+
+    expect(await loadNote('a')).toEqual(revived);
+    expect(await loadNotes()).toEqual([revived]);
+  });
+
   test('삭제해도 저장소에는 tombstone(deletedAt, 빈 content)이 남는다', async () => {
     await saveNote({ id: 'b', content: 'remove', updatedAt: 2000 });
 

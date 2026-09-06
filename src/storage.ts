@@ -64,14 +64,21 @@ export async function loadNote(id: string): Promise<Note | null> {
   }
 }
 
-export async function saveNote(note: Note): Promise<void> {
-  // 삭제된 노트(tombstone)는 자동 저장(unmount flush 등)으로 부활하지 않는다
-  const raw = await AsyncStorage.getItem(noteKey(note.id));
-  if (raw) {
-    try {
-      if ((JSON.parse(raw) as Note).deletedAt != null) return;
-    } catch {
-      // 손상된 항목은 덮어쓴다
+export async function saveNote(
+  note: Note,
+  opts?: { resurrect?: boolean }
+): Promise<void> {
+  // 삭제된 노트(tombstone)는 자동 저장(unmount flush 등)으로 부활하지 않는다.
+  // 단, 에디터가 내용을 비워 스스로 tombstone 을 만든 뒤 계속 타이핑한 경우는
+  // resurrect 로 명시적 부활을 허용한다 (아니면 이후 입력이 전부 저장 거부됨).
+  if (!opts?.resurrect) {
+    const raw = await AsyncStorage.getItem(noteKey(note.id));
+    if (raw) {
+      try {
+        if ((JSON.parse(raw) as Note).deletedAt != null) return;
+      } catch {
+        // 손상된 항목은 덮어쓴다
+      }
     }
   }
   await AsyncStorage.setItem(noteKey(note.id), JSON.stringify(note));
