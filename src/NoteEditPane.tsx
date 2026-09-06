@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   InputAccessoryView,
   KeyboardAvoidingView,
   Platform,
@@ -214,17 +215,30 @@ export default function NoteEditPane({
     return () => document.removeEventListener('keydown', onKey, true);
   }, [tab]);
 
-  // 언마운트(화면 이탈·노트 전환) 시 미저장 변경만 즉시 저장.
+  // 미저장 변경만 즉시 저장 (언마운트·백그라운드 공용).
   // saveTimer 가 걸려 있다 = 디바운스가 아직 안 끝난 입력이 있다는 뜻.
   // 변경이 없는데도 저장하면 updatedAt 이 갱신돼 목록 순서가 뒤바뀐다.
-  useEffect(() => {
-    return () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-        persist(contentRef.current);
-      }
-    };
+  const flushPendingSave = useCallback(() => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      persist(contentRef.current);
+    }
   }, [persist]);
+
+  // 언마운트(화면 이탈·노트 전환) 시 flush
+  useEffect(() => {
+    return () => flushPendingSave();
+  }, [flushPendingSave]);
+
+  // 백그라운드 진입 시 flush: 언마운트 flush 는 프로세스 킬·서스펜드에는
+  // 실행되지 않으므로, 여기서 저장해야 강제 종료 시 입력이 안 날아간다
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') flushPendingSave();
+    });
+    return () => sub.remove();
+  }, [flushPendingSave]);
 
   const headerHeight = useHeaderHeight();
 
