@@ -1,61 +1,13 @@
 import MarkdownIt from 'markdown-it';
-import type { StateCore, Token } from 'markdown-it';
+import aozoraRuby, { stripRuby } from 'markdown-it-aozora-ruby';
 import hljs from 'highlight.js';
 import type { ThemeName } from './theme';
 
 /**
- * Furigana(요미가나) — 아오조라 문고 / 픽시브 표기법.
- *
- *   漢字《かんじ》       ->  <ruby>漢字<rt>かんじ</rt></ruby>   (앞의 한자 연속이 베이스)
- *   ｜東京《とうきょう》  ->  ｜ 로 베이스 시작을 명시 (한자 이외 문자 포함 시)
- *
- * 인용부호 「」『』 와 충돌하지 않도록, 일반 문장에 거의 쓰이지 않는
- * 이중 꺾쇠 《 》 를 구분자로 사용한다. inline 파싱이 끝난 뒤 core 단계에서
- * text 토큰만 변환하므로, 코드 스팬/코드 블록 안의 《 》 는 건드리지 않는다.
+ * Furigana(요미가나) — 아오조라 문고 / 픽시브 표기법 (`漢字《かんじ》`).
+ * 파싱·렌더링은 별도 배포한 markdown-it-aozora-ruby 플러그인에 위임한다
+ * (원래 여기 인라인으로 있던 로직을 패키지로 분리·도그푸딩).
  */
-const FURIGANA_RE =
-  /(?:[｜|]([^《》｜|\n]+)|([㐀-䶿一-鿿々〆ヶ豈-﫿]+))《([^《》\n]+)》/g;
-
-function splitFurigana(content: string, state: StateCore): Token[] {
-  const out: Token[] = [];
-  const push = (type: string, text: string): void => {
-    const t = new state.Token(type, '', 0);
-    t.content = text;
-    out.push(t);
-  };
-
-  let last = 0;
-  let m: RegExpExecArray | null;
-  FURIGANA_RE.lastIndex = 0;
-  while ((m = FURIGANA_RE.exec(content)) !== null) {
-    if (m.index > last) push('text', content.slice(last, m.index));
-    const base = m[1] ?? m[2];
-    const reading = m[3];
-    push('html_inline', '<ruby>');
-    push('text', base);
-    push('html_inline', '<rt>');
-    push('text', reading);
-    push('html_inline', '</rt></ruby>');
-    last = m.index + m[0].length;
-  }
-  if (last < content.length) push('text', content.slice(last));
-  return out;
-}
-
-function furiganaRule(state: StateCore): void {
-  for (const blockToken of state.tokens) {
-    if (blockToken.type !== 'inline' || !blockToken.children) continue;
-    const next: Token[] = [];
-    for (const token of blockToken.children) {
-      if (token.type === 'text' && token.content.includes('《')) {
-        next.push(...splitFurigana(token.content, state));
-      } else {
-        next.push(token);
-      }
-    }
-    blockToken.children = next;
-  }
-}
 
 const md = new MarkdownIt({
   html: true, // 나만 쓰는 앱이므로 정석 <ruby> 태그 직접 입력도 허용
@@ -73,7 +25,7 @@ const md = new MarkdownIt({
   },
 });
 
-md.core.ruler.push('furigana', furiganaRule);
+md.use(aozoraRuby);
 
 // 각 헤딩에 소스 라인 기반 앵커 부여 (목차 점프용): <h2 id="hl-12">
 md.renderer.rules.heading_open = (tokens, idx, options, _env, self) => {
@@ -119,9 +71,7 @@ export function extractHeadings(markdown: string): Heading[] {
 
 /** 목차·노트 목록 표시용으로 후리가나 요미와 인라인 마크업을 제거한다. */
 export function cleanHeadingText(s: string): string {
-  return s
-    .replace(/《[^《》]*》/g, '') // 후리가나 요미 제거 (베이스만 남김)
-    .replace(/[｜|]/g, '')
+  return stripRuby(s) // 후리가나 요미·｜ 제거는 패키지 stripRuby 에 위임 (베이스만 남김)
     .replace(/`([^`]*)`/g, '$1')
     .replace(/\*\*([^*]*)\*\*/g, '$1')
     .replace(/\*([^*]*)\*/g, '$1')
