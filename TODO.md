@@ -21,10 +21,10 @@ Justdown 업데이트 후보 목록. 우선순위·상태를 함께 적는다.
 ## 🟡 자체 점검 잔여 버그·개선 (미수정)
 
 - [ ] iPad 회전 시 편집 컨텍스트 유실 — `selectedId` 리프팅 필요 (구조 변경이라 1.2 이후 권장)
-- [ ] 네이티브 검색바·사이드바 검색 테마 불일치 — `textColor`·`keyboardAppearance` 누락
-- [ ] 앱 시작 시 라이트 플래시 — 초기 테마 적용 전 흰 화면
+- [x] 네이티브 검색바·사이드바 검색 테마 불일치 — headerSearchBarOptions에 textColor·hintTextColor·tintColor 추가, 사이드바 검색에 keyboardAppearance 추가
+- [x] 앱 시작 시 라이트 플래시 — expo-splash-screen으로 테마 로드까지 스플래시 유지 후 렌더
 - [ ] 테마 토글 시 에디터 포커스·스크롤 리셋 — `key={theme}` 트레이드오프 (현재 수용, 재검토 여지)
-- [ ] tombstone GC 없음 — 삭제 마커 누적, 저장소 정리 로직 필요
+- [x] tombstone GC 없음 — purgeTombstones(TTL 30일) 추가, 앱 시작 시 1회 호출
 
 ## 🟠 크로스플랫폼 확장 (선택, 급하지 않음)
 
