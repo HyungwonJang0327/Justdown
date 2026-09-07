@@ -10,8 +10,9 @@
 |---|---|
 | ![다크 모드](docs/screenshots/ipad-dark.png) | <img src="docs/screenshots/ipad-preview.png" width="450" alt="세로 프리뷰"> |
 
-<!-- TODO: screenshot — iPhone 편집 화면 -->
-<!-- TODO: screenshot — macOS 데스크톱 앱 -->
+<img src="docs/screenshots/Iphone.png" width="280" alt="iPhone 편집 화면 — 후리가나 소스">
+
+![macOS 데스크톱 앱 — 사이드바 2-pane](docs/screenshots/macos.png)
 
 ## ✨ 핵심 기능
 
