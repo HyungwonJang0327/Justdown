@@ -115,6 +115,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
             placeholderTextColor={colors.subText}
             autoCapitalize="none"
             autoCorrect={false}
+            keyboardAppearance={theme === 'dark' ? 'dark' : 'light'}
           />
           <TouchableOpacity onPress={createNote} style={styles.newBtn}>
             <Text style={{ fontSize: 26, lineHeight: 28, fontWeight: '300', color: colors.tint }}>

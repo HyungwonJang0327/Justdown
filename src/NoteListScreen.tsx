@@ -35,6 +35,11 @@ export default function NoteListScreen({ navigation }: Props) {
         placeholder: t('search'),
         cancelButtonText: t('cancel'),
         hideWhenScrolling: false,
+        // 다크 모드에서 입력 텍스트·플레이스홀더·커서가 기본(라이트)색으로 남지 않게 지정
+        textColor: colors.text,
+        hintTextColor: colors.subText,
+        headerIconColor: colors.subText,
+        tintColor: colors.tint,
         onChangeText: (e) => setQuery(e.nativeEvent.text),
         onCancelButtonPress: () => setQuery(''),
       },
