@@ -90,6 +90,33 @@ export async function deleteNote(id: string): Promise<void> {
   await AsyncStorage.setItem(noteKey(id), JSON.stringify(tombstone));
 }
 
+/** 삭제 마커(tombstone)는 loadNotes 가 걸러내지만 저장소에는 계속 쌓인다.
+ *  TTL 지난 것만 정리한다. 1.2 iCloud 동기화가 tombstone 으로 삭제를 전파하므로
+ *  TTL 은 넉넉히 둔다(동기화는 초 단위라 30일이면 미전파 삭제가 지워질 위험 없음). */
+const TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30일
+
+export async function purgeTombstones(
+  ttlMs: number = TOMBSTONE_TTL_MS,
+  now: number = Date.now()
+): Promise<number> {
+  const keys = (await AsyncStorage.getAllKeys()).filter((k) =>
+    k.startsWith(NOTE_KEY_PREFIX)
+  );
+  const pairs = await AsyncStorage.multiGet(keys);
+  const expired: string[] = [];
+  for (const [key, raw] of pairs) {
+    if (!raw) continue;
+    try {
+      const note = JSON.parse(raw) as Note;
+      if (note.deletedAt != null && note.deletedAt < now - ttlMs) expired.push(key);
+    } catch {
+      // 손상된 항목은 무시
+    }
+  }
+  if (expired.length) await AsyncStorage.multiRemove(expired);
+  return expired.length;
+}
+
 export async function loadTheme(): Promise<ThemeName> {
   const raw = await AsyncStorage.getItem(THEME_KEY);
   return raw === 'dark' ? 'dark' : 'light';

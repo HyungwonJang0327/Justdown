@@ -5,6 +5,7 @@ import {
   loadNotes,
   loadTheme,
   noteTitle,
+  purgeTombstones,
   saveNote,
   saveTheme,
   type Note,
@@ -159,5 +160,32 @@ describe('레거시 블롭 마이그레이션', () => {
     await AsyncStorage.setItem('justdown.notes', 'not-json');
 
     expect(await loadNotes()).toEqual([]);
+  });
+});
+
+describe('purgeTombstones (오래된 삭제 마커 GC)', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const NOW = 100 * DAY;
+  const TTL = 30 * DAY;
+
+  test('TTL 보다 오래된 tombstone 을 제거하고 개수를 반환한다', async () => {
+    await saveNote({ id: 'old', content: '', updatedAt: NOW - 40 * DAY, deletedAt: NOW - 40 * DAY });
+
+    expect(await purgeTombstones(TTL, NOW)).toBe(1);
+    expect(await AsyncStorage.getItem('justdown.note.old')).toBeNull();
+  });
+
+  test('TTL 이내의 최근 tombstone 은 남긴다 (동기화 전파 대비)', async () => {
+    await saveNote({ id: 'recent', content: '', updatedAt: NOW - 5 * DAY, deletedAt: NOW - 5 * DAY });
+
+    expect(await purgeTombstones(TTL, NOW)).toBe(0);
+    expect(await AsyncStorage.getItem('justdown.note.recent')).not.toBeNull();
+  });
+
+  test('살아있는 노트는 오래돼도 건드리지 않는다', async () => {
+    await saveNote({ id: 'live', content: 'hi', updatedAt: NOW - 40 * DAY });
+
+    expect(await purgeTombstones(TTL, NOW)).toBe(0);
+    expect(await loadNote('live')).not.toBeNull();
   });
 });
