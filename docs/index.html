@@ -162,9 +162,20 @@
   .features h3 { margin-bottom: 8px; }
   .features p { margin: 0; color: var(--ink-2); font-size: 16px; }
 
-  /* iPad */
-  .ipad { margin-top: 48px; }
-  .ipad img { border-radius: var(--radius); border: 1px solid var(--rule); box-shadow: var(--shadow); }
+  /* 라이트↔다크 전환: 같은 화면 두 장을 겹쳐 다크 쪽을 좌→우로 쓸어 보였다가 다시 걷는다 */
+  .theme-demo { margin: 48px 0 0; }
+  .theme-frame { position: relative; aspect-ratio: 1400 / 973; border-radius: var(--radius); border: 1px solid var(--rule); box-shadow: var(--shadow); overflow: hidden; }
+  .theme-frame img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .theme-frame .dark-shot { clip-path: inset(0 100% 0 0); animation: theme-wipe 8s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+  @keyframes theme-wipe {
+    0%, 30% { clip-path: inset(0 100% 0 0); }
+    40%, 75% { clip-path: inset(0 0 0 0); }
+    85%, 100% { clip-path: inset(0 0 0 100%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-frame .dark-shot { animation: none; clip-path: inset(0 0 0 50%); }
+  }
+  .theme-demo figcaption { margin-top: 16px; font-size: 15px; color: var(--ink-3); text-align: center; }
 
   /* notation */
   table { width: 100%; border-collapse: collapse; }
@@ -321,11 +332,12 @@
       <li><h3 data-i18n="f5.t">Search</h3><p data-i18n="f5.d">Find a word across all your notes, or inside the note you're reading.</p></li>
       <li><h3 data-i18n="f6.t">Light and dark</h3><p data-i18n="f6.d">A dark theme that's easier on the eyes for late-night study. Switch any time from the note list.</p></li>
     </ol>
-    <figure class="ipad" style="margin-inline:0">
-      <picture>
-        <source srcset="assets/ipad-dark.webp" media="(prefers-color-scheme: dark)">
-        <img src="assets/ipad.webp" alt="Justdown on iPad in landscape: note list sidebar on the left, preview with furigana on the right" width="1400" height="1050" loading="lazy" decoding="async" data-i18n-alt="alt.ipad">
-      </picture>
+    <figure class="theme-demo">
+      <div class="theme-frame">
+        <img src="assets/theme-light.webp" alt="Justdown on iPad in landscape, switching between the light and dark themes: note list on the left, preview with furigana on the right" width="1400" height="973" loading="lazy" decoding="async" data-i18n-alt="alt.theme">
+        <img class="dark-shot" src="assets/theme-dark.webp" alt="" width="1400" height="973" loading="lazy" decoding="async">
+      </div>
+      <figcaption data-i18n="theme.caption">Light and dark, one tap apart. Shown here on iPad, with the note list and preview side by side.</figcaption>
     </figure>
   </div>
 </section>
@@ -420,7 +432,8 @@
       "hero.store": "App Store でダウンロード", "hero.try": "例を見る →", "hero.fine": "無料。登録不要。広告なし。iPhone と iPad に対応。",
       "alt.code": "iPhone の Justdown：キーボード上に《 》ツールバーがある Code タブ",
       "alt.preview": "iPhone の Justdown：すべての漢字の上にふりがなが付いたプレビュー",
-      "alt.ipad": "横向き iPad の Justdown：左にノート一覧、右にふりがな付きプレビュー",
+      "alt.theme": "横向き iPad の Justdown がライトとダークで切り替わる様子：左にノート一覧、右にふりがな付きプレビュー",
+      "theme.caption": "ライトとダークはワンタップで切り替え。iPad ではノート一覧とプレビューを並べて表示します。",
       "demo.eyebrow": "使い方", "demo.title": "<span class=\"nw\">読みを《 》に</span><span class=\"nw\">書くと、</span><br><span class=\"nw\">漢字の上に</span><span class=\"nw\">表示されます。</span>",
       "demo.sub": "漢字のすぐ後ろに、読みを《 》で囲んで書きます。Preview に切り替えると、読みが漢字の上に移ります。例の Code と Preview を切り替えてみてください。",
       "demo.hide": "ふりがなを隠す", "demo.show": "ふりがなを表示",
@@ -460,7 +473,8 @@
       "hero.store": "App Store에서 다운로드", "hero.try": "예시 보기 →", "hero.fine": "무료. 회원가입 없음. 광고 없음. iPhone과 iPad 지원.",
       "alt.code": "iPhone의 Justdown: 키보드 위에 《 》 툴바가 있는 Code 탭",
       "alt.preview": "iPhone의 Justdown: 모든 한자 위에 후리가나가 붙은 미리보기",
-      "alt.ipad": "가로 방향 iPad의 Justdown: 왼쪽에 노트 목록, 오른쪽에 후리가나 미리보기",
+      "alt.theme": "가로 방향 iPad의 Justdown이 라이트와 다크로 바뀌는 모습: 왼쪽에 노트 목록, 오른쪽에 후리가나 미리보기",
+      "theme.caption": "라이트와 다크는 한 번 탭으로 전환. iPad에서는 노트 목록과 미리보기를 나란히 보여 줘요.",
       "demo.eyebrow": "사용법", "demo.title": "읽는 법을 《 》에 적으면,<br>한자 위에 나타나요.",
       "demo.sub": "한자 바로 뒤에 읽는 법을 《 》로 감싸서 적어요. Preview로 바꾸면 읽는 법이 한자 위로 올라가요. 예시에서 Code와 Preview를 눌러 보세요.",
       "demo.hide": "후리가나 숨기기", "demo.show": "후리가나 보이기",
