@@ -14,6 +14,7 @@ import NoteEditPane, { type Tab } from './NoteEditPane';
 import { EditHeaderButtons, EditTabs } from './EditHeader';
 import { t } from './i18n';
 import { useTheme } from './theme';
+import { useHideRuby } from './useHideRuby';
 import type { RootStackParamList } from './navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Split'>;
@@ -37,6 +38,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
   const [tab, setTab] = useState<Tab>('preview');
   const [findVisible, setFindVisible] = useState(false);
   const [tocVisible, setTocVisible] = useState(false);
+  const [hideRuby, toggleRuby] = useHideRuby(selectedId);
 
   // 저장(자동 저장 포함)될 때마다 사이드바 목록 갱신 — 제목이 실시간으로 따라온다
   const refreshList = useCallback(() => setRefreshToken((t) => t + 1), []);
@@ -153,6 +155,11 @@ export default function TwoPaneScreen({ navigation }: Props) {
                 }}
               />
               <EditHeaderButtons
+                ruby={
+                  tab === 'preview' && hideRuby != null
+                    ? { hidden: hideRuby, onToggle: toggleRuby }
+                    : undefined
+                }
                 onToggleFind={() => {
                   if (tocVisible) {
                     // 목차가 열려 있으면 닫고 검색을 활성화
@@ -171,6 +178,7 @@ export default function TwoPaneScreen({ navigation }: Props) {
               id={selectedId}
               isNew={isNewNote}
               tab={tab}
+              hideRuby={hideRuby}
               findVisible={findVisible}
               tocVisible={tocVisible}
               onRequestCloseFind={() => setFindVisible(false)}

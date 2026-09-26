@@ -10,5 +10,7 @@
   "backToList": "목록",
   "selectNote": "노트를 선택하거나\n＋ 버튼으로 새 노트를 만드세요.",
   "editorPlaceholder": "# 제목\n\n漢字《かんじ》 처럼 후리가나를 넣을 수 있어요.\n키보드 위 《 》 버튼을 눌러보세요.",
-  "noHeadings": "헤딩(#)이 없습니다."
+  "noHeadings": "헤딩(#)이 없습니다.",
+  "showRuby": "요미가나 보이기",
+  "hideRuby": "요미가나 가리기"
 }

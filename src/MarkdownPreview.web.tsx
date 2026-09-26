@@ -6,12 +6,14 @@ import type { MarkdownPreviewProps } from './MarkdownPreviewTypes';
 type PreviewWindow = Window & {
   __find?: (query: string, index: number) => void;
   __setTheme?: (theme: string) => void;
+  __setHideRuby?: (hidden: boolean) => void;
 };
 
 /** 웹 프리뷰: srcdoc iframe. 같은 HTML 문서를 재사용하고 __find를 직접 호출한다. */
 export default function MarkdownPreview({
   content,
   theme,
+  hideRuby,
   findQuery,
   findIndex,
   onFindCount,
@@ -22,11 +24,19 @@ export default function MarkdownPreview({
 
   // 테마는 마운트 시점 문서에만 굽는다. 이후 전환은 __setTheme 로 클래스만
   // 바꿔야 srcdoc 재생성(=iframe 리로드=스크롤 소실)이 일어나지 않는다.
+  // 요미가나 가리기도 같은 방식 (__setHideRuby)
   const [initialTheme] = useState(theme);
-  const doc = useMemo(() => renderMarkdownDocument(content, initialTheme), [content, initialTheme]);
+  const [initialHideRuby] = useState(hideRuby);
+  const doc = useMemo(
+    () => renderMarkdownDocument(content, initialTheme, { hideRuby: initialHideRuby }),
+    [content, initialTheme, initialHideRuby]
+  );
   useEffect(() => {
     (frameRef.current?.contentWindow as PreviewWindow | null | undefined)?.__setTheme?.(theme);
   }, [theme]);
+  useEffect(() => {
+    (frameRef.current?.contentWindow as PreviewWindow | null | undefined)?.__setHideRuby?.(hideRuby);
+  }, [hideRuby]);
 
   const runFind = useCallback(
     (query: string, index: number) => {
@@ -38,10 +48,11 @@ export default function MarkdownPreview({
     [onFindCount]
   );
 
-  // 찾기 상태가 바뀌면 iframe에 반영 (빈 쿼리는 하이라이트 제거)
+  // 찾기 상태가 바뀌면 iframe에 반영 (빈 쿼리는 하이라이트 제거).
+  // 요미가나를 가리거나 보이면 찾기 대상이 달라지므로 다시 찾는다
   useEffect(() => {
     runFind(findQuery, findIndex);
-  }, [runFind, findQuery, findIndex]);
+  }, [runFind, findQuery, findIndex, hideRuby]);
 
   useImperativeHandle(ref, () => ({
     scrollToHeading(line: number) {
@@ -68,7 +79,9 @@ export default function MarkdownPreview({
           }
         });
         // srcdoc 변경 시 재로드되므로 테마·찾기 상태를 다시 적용
-        (frameRef.current?.contentWindow as PreviewWindow | null | undefined)?.__setTheme?.(theme);
+        const win = frameRef.current?.contentWindow as PreviewWindow | null | undefined;
+        win?.__setTheme?.(theme);
+        win?.__setHideRuby?.(hideRuby);
         if (findQuery) runFind(findQuery, findIndex);
       }}
     />

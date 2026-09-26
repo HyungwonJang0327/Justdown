@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { t } from './i18n';
 import type { Tab } from './NoteEditPane';
 import { useTheme } from './theme';
 
@@ -31,17 +32,40 @@ export function EditTabs({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => vo
   );
 }
 
-/** 편집 헤더의 찾기·목차 버튼 (좁은 화면·와이드 모드 공용) */
+/** 편집 헤더의 요미가나·찾기·목차 버튼 (좁은 화면·와이드 모드 공용) */
 export function EditHeaderButtons({
+  ruby,
   onToggleFind,
   onToggleToc,
 }: {
+  /** 요미가나 가리기 토글. Preview 탭에서만 의미가 있어 그때만 넘긴다 */
+  ruby?: { hidden: boolean; onToggle: () => void };
   onToggleFind: () => void;
   onToggleToc: () => void;
 }) {
   const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      {ruby && (
+        <TouchableOpacity
+          onPress={ruby.onToggle}
+          style={[styles.headerBtn, { marginRight: 10 }]}
+          accessibilityRole="button"
+          accessibilityLabel={ruby.hidden ? t('showRuby') : t('hideRuby')}
+        >
+          {/* 가린 상태는 흐리게 + 취소선 */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: ruby.hidden ? colors.subText : colors.text,
+              textDecorationLine: ruby.hidden ? 'line-through' : 'none',
+            }}
+          >
+            あ
+          </Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity onPress={onToggleFind} style={styles.headerBtn}>
         <Text style={{ fontSize: 17 }}>🔍</Text>
       </TouchableOpacity>

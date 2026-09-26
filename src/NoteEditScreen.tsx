@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import NoteEditPane, { type Tab } from './NoteEditPane';
 import { EditHeaderButtons, EditTabs } from './EditHeader';
 import { useTheme } from './theme';
+import { useHideRuby } from './useHideRuby';
 import type { RootStackParamList } from './navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NoteEdit'>;
@@ -15,6 +16,7 @@ export default function NoteEditScreen({ route, navigation }: Props) {
   const [tab, setTab] = useState<Tab>(isNew ? 'code' : 'preview');
   const [findVisible, setFindVisible] = useState(false);
   const [tocVisible, setTocVisible] = useState(false);
+  const [hideRuby, toggleRuby] = useHideRuby(id);
 
   // 상단 탭을 헤더에 배치
   useLayoutEffect(() => {
@@ -30,6 +32,11 @@ export default function NoteEditScreen({ route, navigation }: Props) {
       ),
       headerRight: () => (
         <EditHeaderButtons
+          ruby={
+            tab === 'preview' && hideRuby != null
+              ? { hidden: hideRuby, onToggle: toggleRuby }
+              : undefined
+          }
           onToggleFind={() => {
             if (tocVisible) {
               // 목차가 열려 있으면 닫고 검색을 활성화
@@ -43,13 +50,14 @@ export default function NoteEditScreen({ route, navigation }: Props) {
         />
       ),
     });
-  }, [navigation, tab, colors, tocVisible]);
+  }, [navigation, tab, colors, tocVisible, hideRuby, toggleRuby]);
 
   return (
     <NoteEditPane
       id={id}
       isNew={isNew}
       tab={tab}
+      hideRuby={hideRuby}
       findVisible={findVisible}
       tocVisible={tocVisible}
       onRequestCloseFind={() => setFindVisible(false)}

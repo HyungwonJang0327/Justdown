@@ -10,6 +10,8 @@ export interface MarkdownPreviewHandle {
 export interface MarkdownPreviewProps {
   content: string;
   theme: ThemeName;
+  /** 요미가나(<rt>) 가리기. 자리는 남기고 글자만 숨긴다 */
+  hideRuby: boolean;
   /** 프리뷰 내 찾기 쿼리. 빈 문자열이면 하이라이트 제거 */
   findQuery: string;
   findIndex: number;

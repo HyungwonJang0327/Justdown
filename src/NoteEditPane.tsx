@@ -39,6 +39,8 @@ interface Props {
   isNew: boolean;
   /** 탭·찾기·목차 표시 상태는 헤더(버튼) 소유자가 관리한다 */
   tab: Tab;
+  /** 요미가나 가리기 (노트별 설정, null = 로드 중이라 프리뷰를 아직 띄우지 않음) */
+  hideRuby: boolean | null;
   findVisible: boolean;
   tocVisible: boolean;
   onRequestCloseFind: () => void;
@@ -52,6 +54,7 @@ export default function NoteEditPane({
   id,
   isNew,
   tab,
+  hideRuby,
   findVisible,
   tocVisible,
   onRequestCloseFind,
@@ -337,11 +340,12 @@ export default function NoteEditPane({
         autoFocus={isNew}
         keyboardAppearance={theme === 'dark' ? 'dark' : 'light'}
       />
-      {loaded && tab === 'preview' && (
+      {loaded && hideRuby != null && tab === 'preview' && (
         <MarkdownPreview
           ref={previewRef}
           content={content}
           theme={theme}
+          hideRuby={hideRuby}
           findQuery={findVisible ? findQuery : ''}
           findIndex={findIndex}
           onFindCount={setPreviewCount}
