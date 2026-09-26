@@ -12,6 +12,7 @@ export interface Note {
 const NOTES_KEY = 'justdown.notes';
 const THEME_KEY = 'justdown.theme';
 const NOTE_KEY_PREFIX = 'justdown.note.';
+const HIDE_RUBY_KEY = 'justdown.hideRuby';
 
 function noteKey(id: string): string {
   return NOTE_KEY_PREFIX + id;
@@ -114,7 +115,53 @@ export async function purgeTombstones(
     }
   }
   if (expired.length) await AsyncStorage.multiRemove(expired);
+  // 저장소에서 사라진 노트의 요미가나 설정도 함께 정리한다
+  const alive = new Set(
+    keys.filter((k) => !expired.includes(k)).map((k) => k.slice(NOTE_KEY_PREFIX.length))
+  );
+  await updateHideRubyIds((ids) => ids.filter((id) => alive.has(id)));
   return expired.length;
+}
+
+/** 요미가나를 가린 노트 ID 목록. 기기별 보기 설정이라 노트 본문·updatedAt 과 분리해 둔다
+ *  (노트에 넣으면 토글이 목록 순서·자동 저장과 얽힌다). 삭제된 노트의 ID 는
+ *  tombstone 이 GC 될 때 purgeTombstones 가 정리한다 — 비웠다가 재입력(resurrect)한
+ *  노트의 설정이 날아가지 않도록 deleteNote 시점에는 지우지 않는다. */
+async function loadHideRubyIds(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(HIDE_RUBY_KEY);
+  if (!raw) return [];
+  try {
+    const ids: unknown = JSON.parse(raw);
+    return Array.isArray(ids) ? ids.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+// 읽고-고쳐-쓰기라서 연속 토글이 서로의 결과를 덮어쓰지 않게 직렬화한다
+let hideRubyQueue: Promise<void> = Promise.resolve();
+
+function updateHideRubyIds(fn: (ids: string[]) => string[]): Promise<void> {
+  const run = hideRubyQueue.then(async () => {
+    const ids = await loadHideRubyIds();
+    const next = fn(ids);
+    if (next.length === ids.length && next.every((id, i) => id === ids[i])) return;
+    if (next.length) await AsyncStorage.setItem(HIDE_RUBY_KEY, JSON.stringify(next));
+    else await AsyncStorage.removeItem(HIDE_RUBY_KEY);
+  });
+  hideRubyQueue = run.catch(() => {});
+  return run;
+}
+
+export async function loadHideRuby(id: string): Promise<boolean> {
+  return (await loadHideRubyIds()).includes(id);
+}
+
+export function saveHideRuby(id: string, hidden: boolean): Promise<void> {
+  return updateHideRubyIds((ids) => {
+    const rest = ids.filter((x) => x !== id);
+    return hidden ? [...rest, id] : rest;
+  });
 }
 
 export async function loadTheme(): Promise<ThemeName> {

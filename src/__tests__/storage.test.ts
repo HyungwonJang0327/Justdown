@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   deleteNote,
+  loadHideRuby,
   loadNote,
   loadNotes,
   loadTheme,
   noteTitle,
   purgeTombstones,
+  saveHideRuby,
   saveNote,
   saveTheme,
   type Note,
@@ -187,5 +189,61 @@ describe('purgeTombstones (오래된 삭제 마커 GC)', () => {
 
     expect(await purgeTombstones(TTL, NOW)).toBe(0);
     expect(await loadNote('live')).not.toBeNull();
+  });
+
+  test('GC 된 노트와 저장소에 없는 노트의 요미가나 설정도 정리한다', async () => {
+    await saveNote({ id: 'old', content: '', updatedAt: NOW - 40 * DAY, deletedAt: NOW - 40 * DAY });
+    await saveNote({ id: 'recent', content: '', updatedAt: NOW - 5 * DAY, deletedAt: NOW - 5 * DAY });
+    await saveNote({ id: 'live', content: 'hi', updatedAt: NOW });
+    for (const id of ['old', 'recent', 'live', 'never-saved']) await saveHideRuby(id, true);
+
+    await purgeTombstones(TTL, NOW);
+
+    expect(await loadHideRuby('old')).toBe(false);
+    expect(await loadHideRuby('never-saved')).toBe(false);
+    // 아직 GC 전인 tombstone 은 비웠다가 재입력(resurrect)될 수 있으므로 설정을 남긴다
+    expect(await loadHideRuby('recent')).toBe(true);
+    expect(await loadHideRuby('live')).toBe(true);
+  });
+});
+
+describe('loadHideRuby / saveHideRuby (노트별 요미가나 가리기)', () => {
+  test('기본값은 보이기(false)', async () => {
+    expect(await loadHideRuby('a')).toBe(false);
+  });
+
+  test('노트별로 독립적으로 저장된다', async () => {
+    await saveHideRuby('a', true);
+
+    expect(await loadHideRuby('a')).toBe(true);
+    expect(await loadHideRuby('b')).toBe(false);
+
+    await saveHideRuby('a', false);
+    expect(await loadHideRuby('a')).toBe(false);
+  });
+
+  test('노트 본문·updatedAt 은 건드리지 않는다 (목록 순서 유지)', async () => {
+    const note: Note = { id: 'a', content: 'x', updatedAt: 1000 };
+    await saveNote(note);
+
+    await saveHideRuby('a', true);
+
+    expect(await loadNote('a')).toEqual(note);
+  });
+
+  test('연속 호출이 서로의 결과를 덮어쓰지 않는다', async () => {
+    await Promise.all([saveHideRuby('a', true), saveHideRuby('b', true), saveHideRuby('c', true)]);
+
+    expect(await loadHideRuby('a')).toBe(true);
+    expect(await loadHideRuby('b')).toBe(true);
+    expect(await loadHideRuby('c')).toBe(true);
+  });
+
+  test('손상된 저장값은 빈 목록으로 취급한다', async () => {
+    await AsyncStorage.setItem('justdown.hideRuby', 'not-json');
+
+    expect(await loadHideRuby('a')).toBe(false);
+    await saveHideRuby('a', true);
+    expect(await loadHideRuby('a')).toBe(true);
   });
 });
