@@ -335,7 +335,8 @@
     <figure class="theme-demo">
       <div class="theme-frame">
         <img src="assets/theme-light.webp" alt="Justdown on iPad in landscape, switching between the light and dark themes: note list on the left, preview with furigana on the right" width="1400" height="973" loading="lazy" decoding="async" data-i18n-alt="alt.theme">
-        <img class="dark-shot" src="assets/theme-dark.webp" alt="" width="1400" height="973" loading="lazy" decoding="async">
+        <!-- lazy 금지: 처음엔 clip-path 로 완전히 가려져 있어 Chrome 이 화면 밖으로 보고 끝내 로드하지 않는다 -->
+        <img class="dark-shot" src="assets/theme-dark.webp" alt="" width="1400" height="973" decoding="async">
       </div>
       <figcaption data-i18n="theme.caption">Light and dark, one tap apart. Shown here on iPad, with the note list and preview side by side.</figcaption>
     </figure>
