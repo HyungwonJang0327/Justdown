@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { t } from './i18n';
 import type { Tab } from './NoteEditPane';
 import { useTheme } from './theme';
@@ -100,6 +100,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 9,
     overflow: 'hidden',
+    // Android 헤더는 제목을 왼쪽 정렬하고 남은 폭까지 늘리므로 탭 폭을 내용에 맞춘다.
+    // (가운데 정렬하면 오른쪽 あ·🔍·☰ 버튼과 맞닿는다)
+    ...(Platform.OS === 'android' && { alignSelf: 'flex-start' as const }),
   },
   tab: { paddingVertical: 6, paddingHorizontal: 18 },
   tabCompact: { paddingHorizontal: 12 },
