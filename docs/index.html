@@ -138,9 +138,9 @@
   .tabs { display: flex; border: 1px solid var(--rule-strong); border-radius: 9px; overflow: hidden; }
   .tabs button { background: transparent; border: 0; color: var(--ink-3); font: inherit; font-size: 14px; font-weight: 600; padding: 5px 16px; cursor: pointer; }
   .tabs button[aria-selected="true"] { background: var(--brand); color: var(--on-brand); }
-  /* 앱의 あ 버튼과 같은 모양: 카드 배경·가는 테두리, 가리면 글자만 흐리게 */
+  /* 앱의 あ 버튼과 같은 모양: 카드 배경·가는 테두리, 가리면 흐리게 + 취소선 */
   .ruby-toggle { margin-left: auto; width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--rule-strong); background: var(--paper-2); color: var(--ink); font: inherit; font-size: 19px; font-weight: 600; cursor: pointer; }
-  .ruby-toggle[aria-pressed="true"] { color: var(--ink-3); }
+  .ruby-toggle[aria-pressed="true"] { color: var(--ink-3); text-decoration: line-through; }
   .demo-body { padding: 24px 26px; min-height: 300px; font-size: 17px; }
   .demo-body[hidden] { display: none; }
   .demo-code { font-family: var(--mono); font-size: 14px; white-space: pre-wrap; line-height: 1.85; margin: 0; }
