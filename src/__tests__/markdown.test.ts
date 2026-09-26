@@ -149,6 +149,21 @@ describe('renderMarkdownDocument (WebView 용 완전한 문서)', () => {
     // 초기 클래스 말고는 완전히 동일해야 테마 전환이 리로드를 유발하지 않는다
     expect(dark.replace(' class="dark"', '')).toBe(light);
   });
+
+  test('요미가나 가리기도 html 클래스로만 반영된다 (토글 시 리로드·스크롤 소실 없음)', () => {
+    const shown = renderMarkdownDocument('漢字《かんじ》', 'light');
+    const hidden = renderMarkdownDocument('漢字《かんじ》', 'light', { hideRuby: true });
+    expect(shown).toContain('window.__setHideRuby');
+    expect(hidden).toContain('<html lang="ja" class="hide-ruby">');
+    expect(hidden.replace(' class="hide-ruby"', '')).toBe(shown);
+    // 자리는 남기고 글자만 숨긴다 (display:none 이면 토글 때 줄 높이가 출렁인다)
+    expect(shown).toContain('html.hide-ruby .md rt { visibility: hidden; }');
+  });
+
+  test('다크 테마와 요미가나 가리기는 한 클래스 속성에 공존한다', () => {
+    const doc = renderMarkdownDocument('x', 'dark', { hideRuby: true });
+    expect(doc).toContain('<html lang="ja" class="dark hide-ruby">');
+  });
 });
 
 describe('extractHeadings (목차 패널용)', () => {

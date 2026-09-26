@@ -87,10 +87,15 @@ export function renderMarkdownBody(markdown: string): string {
 /** WebView 에 주입할 완전한 HTML 문서를 생성한다.
  *  테마는 html 클래스로만 반영 — CSS 는 양 테마를 모두 포함하므로
  *  __setTheme 호출만으로 문서 재생성(리로드·스크롤 소실) 없이 전환된다. */
-export function renderMarkdownDocument(markdown: string, theme: ThemeName): string {
+export function renderMarkdownDocument(
+  markdown: string,
+  theme: ThemeName,
+  opts?: { hideRuby?: boolean }
+): string {
   const body = renderMarkdownBody(markdown);
+  const classes = [theme === 'dark' && 'dark', opts?.hideRuby && 'hide-ruby'].filter(Boolean);
   return `<!DOCTYPE html>
-<html lang="ja"${theme === 'dark' ? ' class="dark"' : ''}>
+<html lang="ja"${classes.length ? ` class="${classes.join(' ')}"` : ''}>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -106,6 +111,10 @@ ${body}
   window.__setTheme = function (t) {
     document.documentElement.classList.toggle('dark', t === 'dark');
   };
+  // 요미가나 가리기: 테마와 같은 방식(클래스만 전환)이라 스크롤 위치가 유지된다
+  window.__setHideRuby = function (h) {
+    document.documentElement.classList.toggle('hide-ruby', !!h);
+  };
   // 프리뷰 내 찾기: 텍스트 노드를 걸어 매치를 <mark>로 감싸고 index번째로 스크롤.
   // RN 쪽에서 injectJavaScript로 호출하고, 매치 수는 postMessage로 돌려준다.
   window.__find = function (query, index) {
@@ -117,11 +126,14 @@ ${body}
     var count = 0;
     if (query) {
       var q = query.toLowerCase();
+      var hideRuby = document.documentElement.classList.contains('hide-ruby');
       var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
       var nodes = [];
       while (walker.nextNode()) {
         var n = walker.currentNode;
         if (n.parentNode && n.parentNode.closest('script,style')) continue;
+        // 가려진 요미가나는 찾기 대상에서 제외 (안 보이는 매치로 스크롤하지 않도록)
+        if (hideRuby && n.parentNode && n.parentNode.closest('rt')) continue;
         if (n.nodeValue.toLowerCase().indexOf(q) >= 0) nodes.push(n);
       }
       nodes.forEach(function (node) {
@@ -240,6 +252,8 @@ function baseCss(): string {
     line-height: 1;
     user-select: none;
   }
+  /* 자리는 남기고 글자만 숨긴다 — 토글해도 줄 높이가 그대로라 읽던 위치가 흔들리지 않는다 */
+  html.hide-ruby .md rt { visibility: hidden; }
 
   /* highlight.js token colors (github light/dark 간소화 버전) */
   ${hljsLightCss()}
