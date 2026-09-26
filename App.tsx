@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -38,6 +39,12 @@ export default function App() {
     });
     purgeTombstones(); // 오래된 삭제 마커 정리 (앱 시작 시 1회, 실패해도 무시)
   }, []);
+
+  // 루트 뷰 배경을 앱 테마에 맞춘다. Android(edge-to-edge)에서 하단 제스처 바 영역은
+  // 루트 배경이 비쳐 보이므로, 앱만 다크로 바꾸면 그 영역이 라이트로 남는다
+  useEffect(() => {
+    if (themeLoaded) SystemUI.setBackgroundColorAsync(colorsFor(theme).bg);
+  }, [theme, themeLoaded]);
 
   // 테마가 적용된 첫 레이아웃이 그려진 뒤 스플래시를 내린다 (플래시 없이 전환)
   const onLayoutRoot = useCallback(() => {
