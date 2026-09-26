@@ -56,7 +56,6 @@
     --brand: #1668d8; --brand-hover: #0f58bd; --on-brand: #ffffff;
     --ruby: #1668d8; --rt: #6b675f;
     --shadow: 0 1px 2px rgba(29, 28, 26, 0.06), 0 18px 40px -12px rgba(29, 28, 26, 0.18);
-    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", AppleMyungjo, "Noto Serif KR", serif;
     --sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --radius: 14px;
@@ -87,7 +86,7 @@
   ruby { ruby-position: over; }
   rt { color: var(--ruby); font-family: var(--sans); font-weight: 600; font-size: 0.42em; letter-spacing: 0.04em; }
 
-  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+  h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
   :lang(ja) h1, :lang(ja) h2, :lang(ja) h3, :lang(ko) h1, :lang(ko) h2, :lang(ko) h3 { letter-spacing: 0; }
   h1 { font-size: clamp(38px, 4.8vw, 60px); line-height: 1.25; }
   h2 { font-size: clamp(30px, 3.8vw, 46px); line-height: 1.25; }
@@ -104,7 +103,7 @@
   nav .wrap { display: flex; align-items: center; height: 56px; gap: 28px; font-size: 14px; }
   nav a { color: var(--ink-2); text-decoration: none; }
   nav a:hover { color: var(--ink); }
-  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--ink) !important; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--ink) !important; }
   .brand img { width: 26px; height: 26px; border-radius: 6px; }
   .links { display: flex; gap: 24px; margin-left: 8px; }
   .spacer { flex: 1; }
@@ -115,7 +114,8 @@
   /* buttons */
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 16px; font-weight: 600; background: var(--brand); color: var(--on-brand); text-decoration: none; transition: background 0.15s; }
   .btn:hover { background: var(--brand-hover); }
-  .btn-sm { padding: 7px 14px; font-size: 14px; border-radius: 8px; }
+  /* 언어마다 문구 길이가 달라 버튼 폭이 바뀌면 옆의 언어 전환이 밀린다 → 폭 고정 */
+  .btn-sm { padding: 7px 10px; font-size: 14px; border-radius: 8px; width: 120px; justify-content: center; white-space: nowrap; }
   .btn-text { font-weight: 600; text-decoration: none; }
   .btn-text:hover { text-decoration: underline; }
   .cta { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; margin-top: 32px; }
@@ -168,7 +168,7 @@
   th, td { text-align: left; padding: 16px 12px 16px 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
   th { color: var(--ink-3); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; border-bottom-color: var(--rule-strong); }
   td code { font-family: var(--mono); font-size: 15px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 8px; }
-  td:last-child { font-size: 24px; font-family: var(--serif); }
+  td:last-child { font-size: 24px; }
   td rt { font-size: 0.42em; }
   .table-wrap { overflow-x: auto; }
   .prose p { color: var(--ink-2); margin: 0 0 16px; }
@@ -176,7 +176,7 @@
   /* privacy: 장부처럼 한 줄씩 */
   .ledger { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule-strong); }
   .ledger li { display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--rule); }
-  .ledger .n { font-family: var(--serif); font-size: 34px; font-weight: 600; color: var(--ruby); line-height: 1; }
+  .ledger .n { font-size: 34px; font-weight: 700; color: var(--ruby); line-height: 1; }
   .ledger h3 { font-size: 18px; }
   .ledger p { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
 
