@@ -286,7 +286,9 @@ export default function NoteEditPane({
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.bg }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      // Android 도 padding: SDK 57 은 edge-to-edge 라 키보드가 떠도 창이 줄지 않아(adjustResize 무효)
+      // 직접 밀어 올리지 않으면 입력 중인 줄과 서식 툴바가 키보드 뒤에 가려진다
+      behavior={Platform.OS === 'web' ? undefined : 'padding'}
       keyboardVerticalOffset={headerHeight}
     >
       {findVisible && (
