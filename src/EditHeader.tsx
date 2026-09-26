@@ -49,18 +49,13 @@ export function EditHeaderButtons({
       {ruby && (
         <TouchableOpacity
           onPress={ruby.onToggle}
-          style={[styles.headerBtn, { marginRight: 10 }]}
+          style={[styles.rubyBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
           accessibilityRole="button"
           accessibilityLabel={ruby.hidden ? t('showRuby') : t('hideRuby')}
         >
-          {/* 가린 상태는 흐리게 + 취소선 */}
+          {/* 가린 상태는 글자만 흐리게 */}
           <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '600',
-              color: ruby.hidden ? colors.subText : colors.text,
-              textDecorationLine: ruby.hidden ? 'line-through' : 'none',
-            }}
+            style={[styles.rubyText, { color: ruby.hidden ? colors.subText : colors.text }]}
           >
             あ
           </Text>
@@ -85,4 +80,14 @@ const styles = StyleSheet.create({
   },
   tab: { paddingVertical: 6, paddingHorizontal: 18 },
   headerBtn: { paddingHorizontal: 10, paddingVertical: 6 },
+  rubyBtn: {
+    width: 36,
+    height: 36,
+    marginRight: 10,
+    borderRadius: 9,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rubyText: { fontSize: 20, fontWeight: '600' },
 });
