@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-webview/apple/RNCWebViewImpl.m b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+index 7f5c24d..87012ab 100644
+--- a/node_modules/react-native-webview/apple/RNCWebViewImpl.m
++++ b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+@@ -530,6 +530,9 @@ RCTAutoInsetsProtocol>
+       [self addPullToRefreshControl];
+     }
+     _webView.scrollView.scrollEnabled = _scrollEnabled;
++    // Justdown: iOS 27은 내비게이션 바 어디를 탭해도 scroll-to-top 이 동작해, 헤더 버튼(あ·🔍·☰)을
++    // 누를 때마다 프리뷰가 맨 위로 튄다. 프리뷰를 scroll-to-top 대상에서 제외한다.
++    _webView.scrollView.scrollsToTop = NO;
+     _webView.scrollView.pagingEnabled = _pagingEnabled;
+     //For UIRefreshControl to work correctly, the bounces should always be true
+     _webView.scrollView.bounces = _pullToRefreshEnabled || _bounces;
