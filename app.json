@@ -37,8 +37,9 @@
       "expo-localization"
     ],
     "android": {
+      "package": "com.hyungwonlabs.justdown",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#2F86EB",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
