@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AppState,
   InputAccessoryView,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -245,11 +246,24 @@ export default function NoteEditPane({
 
   const headerHeight = useHeaderHeight();
 
+  // Android 는 InputAccessoryView 가 없어, 키보드가 떠 있는 동안 에디터 아래(=키보드 바로 위)에
+  // 툴바를 직접 붙인다
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   // 현재 탭 기준 매치 수/위치 (Preview는 findIndex가 래핑되지 않으므로 여기서 래핑)
   const findCount = tab === 'preview' ? previewCount : matches.length;
   const findPos = findCount === 0 ? 0 : ((findIndex % findCount) + findCount) % findCount;
 
-  // 서식 툴바: iOS는 키보드 액세서리로, 웹은 에디터 상단 고정 바로 표시
+  // 서식 툴바: iOS는 키보드 액세서리로, 웹은 에디터 상단 고정 바로, Android는 키보드 바로 위에 표시
   const toolbar = (
     <View style={[styles.accessory, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <ScrollView horizontal keyboardShouldPersistTaps="always" showsHorizontalScrollIndicator={false}>
@@ -340,6 +354,7 @@ export default function NoteEditPane({
         autoFocus={isNew}
         keyboardAppearance={theme === 'dark' ? 'dark' : 'light'}
       />
+      {Platform.OS === 'android' && tab === 'code' && keyboardVisible && toolbar}
       {loaded && hideRuby != null && tab === 'preview' && (
         <MarkdownPreview
           ref={previewRef}
