@@ -83,6 +83,8 @@
   /* 한국어는 어절 단위, 일본어는 금칙 처리를 엄격하게 줄바꿈 */
   :lang(ko) { word-break: keep-all; }
   :lang(ja) { word-break: normal; line-break: strict; }
+  /* 일본어 제목은 문절 단위로만 줄바꿈 (띄어쓰기가 없어 단어 중간에서 끊기므로) */
+  .nw { display: inline-block; }
   ruby { ruby-position: over; }
   rt { color: var(--ruby); font-family: var(--sans); font-weight: 600; font-size: 0.42em; letter-spacing: 0.04em; }
 
@@ -167,7 +169,7 @@
   /* notation */
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 16px 12px 16px 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
-  th { color: var(--ink-3); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; border-bottom-color: var(--rule-strong); }
+  th { white-space: nowrap; color: var(--ink-3); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; border-bottom-color: var(--rule-strong); }
   td code { font-family: var(--mono); font-size: 15px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 8px; }
   td:last-child { font-size: 24px; }
   td rt { font-size: 0.42em; }
@@ -232,9 +234,9 @@
   <div class="wrap">
     <a class="brand" href="#top"><img src="assets/icon-216.webp" alt="" width="26" height="26"><span>Justdown</span></a>
     <div class="links">
-      <a href="#demo" data-i18n="nav.demo">Furigana</a>
+      <a href="#demo" data-i18n="nav.demo">How it works</a>
       <a href="#features" data-i18n="nav.features">Features</a>
-      <a href="#notation" data-i18n="nav.notation">Notation</a>
+      <a href="#notation" data-i18n="nav.notation">Writing guide</a>
       <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
     </div>
     <div class="spacer"></div>
@@ -252,13 +254,13 @@
   <div class="wrap">
     <div>
       <img class="icon" src="assets/icon-216.webp" alt="" width="72" height="72">
-      <h1 data-i18n-html="hero.title">Write in markdown.<br>Read with <ruby>振<rt>ふ</rt></ruby>り<ruby>仮名<rt>がな</rt></ruby>.</h1>
-      <p class="lede" data-i18n-html="hero.sub">A note app for people learning Japanese. Write the reading once — it sits above the kanji every time you read.</p>
+      <h1 data-i18n-html="hero.title">Notes that show<br>how to read every <ruby>漢字<rt>かんじ</rt></ruby>.</h1>
+      <p class="lede" data-i18n="hero.sub">Justdown is a note app for people learning Japanese. Write a kanji word and its reading once, and the reading appears in small letters above the kanji — just like the furigana in Japanese children's books and manga.</p>
       <div class="cta">
         <a class="btn" href="https://apps.apple.com/app/justdown/id6805135080" data-i18n="hero.store">Download on the App Store</a>
-        <a class="btn-text" href="#demo" data-i18n="hero.try">See how it works →</a>
+        <a class="btn-text" href="#demo" data-i18n="hero.try">See an example →</a>
       </div>
-      <p class="fine" data-i18n="hero.fine">Free. No account. No ads. iPhone and iPad.</p>
+      <p class="fine" data-i18n="hero.fine">Free. No sign-up. No ads. For iPhone and iPad.</p>
     </div>
     <div class="stack">
       <img class="back" src="assets/iphone-code.webp" alt="Justdown on iPhone: Code tab with the 《 》 keyboard toolbar" width="600" height="1304" data-i18n-alt="alt.code">
@@ -270,10 +272,10 @@
 <section id="demo" class="band">
   <div class="wrap split">
     <div>
-      <span class="label" data-i18n="demo.eyebrow">Furigana</span>
-      <h2 data-i18n-html="demo.title">Type <span class="accent">漢字《かんじ》</span>.<br>Read it like a book.</h2>
-      <p class="lede" data-i18n="demo.sub">Aozora Bunko notation in, real ruby text out. Tap あ to hide the readings and quiz yourself.</p>
-      <p class="demo-hint" data-i18n="demo.hint">Readings hide in place — the line height never changes, so nothing jumps while you read.</p>
+      <span class="label" data-i18n="demo.eyebrow">How it works</span>
+      <h2 data-i18n-html="demo.title">Write the reading in 《 》.<br>It shows up above the kanji.</h2>
+      <p class="lede" data-i18n="demo.sub">Right after a kanji word, type its reading inside 《 》 brackets. Switch to Preview and the reading moves above the kanji. Try the Code and Preview tabs in the example.</p>
+      <p class="demo-hint" data-i18n="demo.hint">Want to test yourself? Tap あ to hide the readings. Tap it again to bring them back.</p>
     </div>
     <div class="demo" id="demoBox">
       <div class="demo-bar">
@@ -310,14 +312,14 @@
 <section id="features">
   <div class="wrap">
     <span class="label" data-i18n="feat.eyebrow">Features</span>
-    <h2 data-i18n-html="feat.title">A plain markdown editor.<br>Plus the one thing you needed.</h2>
+    <h2 data-i18n-html="feat.title">Simple notes,<br>built for reading Japanese.</h2>
     <ol class="features">
-      <li><h3 data-i18n="f1.t">Furigana that renders</h3><p data-i18n="f1.d">漢字《かんじ》 becomes a real ruby tag in the preview. Use ｜ to mark where the reading begins.</p></li>
-      <li><h3 data-i18n="f2.t">Hide readings per note</h3><p data-i18n="f2.d">One tap hides every furigana in a note so you can test yourself. Each note remembers its own setting.</p></li>
-      <li><h3 data-i18n="f3.t">Keyboard toolbar</h3><p data-i18n="f3.d">《 》 and ｜ are hard to type on a Japanese keyboard. One tap from the toolbar.</p></li>
-      <li><h3 data-i18n="f4.t">Real markdown</h3><p data-i18n="f4.d">Tables, code blocks with highlighting, Code / Preview tabs, a table of contents from your headings.</p></li>
-      <li><h3 data-i18n="f5.t">Search everything</h3><p data-i18n="f5.d">Across all notes, or inside one — jumping between matches in both Code and Preview.</p></li>
-      <li><h3 data-i18n="f6.t">Light and dark</h3><p data-i18n="f6.d">A dark theme for late-night study, switchable from the note list.</p></li>
+      <li><h3 data-i18n="f1.t">Readings above the kanji</h3><p data-i18n="f1.d">Write 漢字《かんじ》 and it shows as 漢字 with かんじ in small letters on top. No special keyboard or settings needed.</p></li>
+      <li><h3 data-i18n="f2.t">Hide readings to quiz yourself</h3><p data-i18n="f2.d">Tap あ to hide every reading in a note and check whether you can still read it. Each note remembers whether its readings are shown or hidden.</p></li>
+      <li><h3 data-i18n="f3.t">Shortcut buttons above the keyboard</h3><p data-i18n="f3.d">《 》 are hard to find on most keyboards. A button above the keyboard types them for you.</p></li>
+      <li><h3 data-i18n="f4.t">Headings, lists and tables</h3><p data-i18n="f4.d">Start a line with # for a heading or - for a list (this style is called markdown). Long notes get a table of contents made from their headings.</p></li>
+      <li><h3 data-i18n="f5.t">Search</h3><p data-i18n="f5.d">Find a word across all your notes, or inside the note you're reading.</p></li>
+      <li><h3 data-i18n="f6.t">Light and dark</h3><p data-i18n="f6.d">A dark theme that's easier on the eyes for late-night study. Switch any time from the note list.</p></li>
     </ol>
     <figure class="ipad" style="margin-inline:0">
       <picture>
@@ -331,17 +333,17 @@
 <section id="notation" class="band">
   <div class="wrap split">
     <div>
-      <span class="label" data-i18n="not.eyebrow">Notation</span>
-      <h2 data-i18n-html="not.title">Plain text.<br>Yours forever.</h2>
+      <span class="label" data-i18n="not.eyebrow">Writing guide</span>
+      <h2 data-i18n-html="not.title">Almost nothing<br>to memorize.</h2>
       <div class="prose">
-        <p class="lede" data-i18n="not.sub">Justdown uses the same furigana markup as Aozora Bunko, Japan's public-domain library. No lock-in — copy it anywhere.</p>
-        <p style="margin-top:20px" data-i18n="not.p1">The reading goes right after the kanji in 《 》. When the kanji run starts mid-word, put ｜ before it so the reading attaches to the right characters. Inside code blocks nothing is converted.</p>
-        <p data-i18n-html="not.p2">The parser is open source as <a href="https://www.npmjs.com/package/markdown-it-aozora-ruby">markdown-it-aozora-ruby</a>, a markdown-it plugin you can use in your own project.</p>
+        <p class="lede" data-i18n="not.sub">The writing style comes from Aozora Bunko, a free online library of Japanese books. It's all plain text, so your notes still make sense when you paste them into other apps.</p>
+        <p style="margin-top:20px" data-i18n="not.p1">The basic rule: put the reading in 《 》 right after the kanji. When the kanji starts in the middle of a word, like お土産, add ｜ just before the kanji so the app knows where it begins.</p>
+        <p data-i18n-html="not.p2">For developers: the part that converts 《 》 is open source as <a href="https://www.npmjs.com/package/markdown-it-aozora-ruby">markdown-it-aozora-ruby</a>.</p>
       </div>
     </div>
     <div class="table-wrap">
       <table lang="ja">
-        <thead><tr><th data-i18n="not.h1">You type</th><th data-i18n="not.h2">You see</th></tr></thead>
+        <thead><tr><th data-i18n="not.h1">If you type</th><th data-i18n="not.h2">You'll see</th></tr></thead>
         <tbody>
           <tr><td><code>漢字《かんじ》</code></td><td><ruby>漢字<rt>かんじ</rt></ruby></td></tr>
           <tr><td><code>お｜土産《みやげ》</code></td><td>お<ruby>土産<rt>みやげ</rt></ruby></td></tr>
@@ -358,13 +360,13 @@
     <div>
       <span class="label" data-i18n="priv.eyebrow">Privacy</span>
       <h2 data-i18n-html="priv.title">Your notes stay<br>on your device.</h2>
-      <p class="lede" data-i18n="priv.sub">Justdown has no server and never opens a network connection.</p>
+      <p class="lede" data-i18n="priv.sub">Justdown never connects to the internet. There's no sign-up, and nobody — not even the developer — can see what you write.</p>
     </div>
     <ul class="ledger">
-      <li><span class="n">0</span><div><h3 data-i18n="p1.t">Accounts</h3><p data-i18n="p1.d">Open the app and write.</p></div></li>
-      <li><span class="n">0</span><div><h3 data-i18n="p2.t">Trackers</h3><p data-i18n="p2.d">No analytics, no crash reporter.</p></div></li>
-      <li><span class="n">0</span><div><h3 data-i18n="p3.t">Ads</h3><p data-i18n="p3.d">Free, with nothing to upsell.</p></div></li>
-      <li><span class="n">100%</span><div><h3 data-i18n="p4.t">On device</h3><p data-i18n="p4.d">Notes live only in the app's storage.</p></div></li>
+      <li><span class="n">0</span><div><h3 data-i18n="p1.t">Accounts</h3><p data-i18n="p1.d">No sign-up. Open the app and start writing.</p></div></li>
+      <li><span class="n">0</span><div><h3 data-i18n="p2.t">Trackers</h3><p data-i18n="p2.d">No usage tracking or data collection.</p></div></li>
+      <li><span class="n">0</span><div><h3 data-i18n="p3.t">Ads</h3><p data-i18n="p3.d">Free, with no ads and no in-app purchases.</p></div></li>
+      <li><span class="n">100%</span><div><h3 data-i18n="p4.t">On device</h3><p data-i18n="p4.d">Notes are saved only on your iPhone or iPad.</p></div></li>
     </ul>
   </div>
 </section>
@@ -374,10 +376,12 @@
     <span class="label" data-i18n="faq.eyebrow">FAQ</span>
     <h2 data-i18n="faq.title">Questions</h2>
     <div class="faq">
-      <details><summary data-i18n="faq.1q">Does it add furigana automatically?</summary><p data-i18n="faq.1a">No. You write the reading yourself in 《 》. That's deliberate — typing the reading is part of learning it, and it keeps the app fully offline.</p></details>
-      <details><summary data-i18n="faq.2q">Can I sync between iPhone and iPad?</summary><p data-i18n="faq.2a">Not yet. iCloud sync is the next planned feature.</p></details>
-      <details><summary data-i18n="faq.3q">Is there an Android version?</summary><p data-i18n="faq.3a">Not at the moment. Justdown is iPhone and iPad only for now.</p></details>
-      <details><summary data-i18n="faq.4q">How do I get my notes out?</summary><p data-i18n="faq.4a">Notes are plain markdown. Copy from the Code tab and paste anywhere — the 《 》 notation reads fine on its own and works in Aozora Bunko-compatible readers.</p></details>
+      <details><summary data-i18n="faq.what.q">What is furigana?</summary><p data-i18n="faq.what.a">Small hiragana written above or beside a kanji to show how it's read — for example, かんじ above 漢字. Japanese children's books, manga and textbooks use it all the time.</p></details>
+      <details><summary data-i18n="faq.md.q">Do I need to know markdown?</summary><p data-i18n="faq.md.a">No. You can just write plain sentences. Markdown is a few optional symbols — # at the start of a line makes a heading, - makes a list item — and Preview shows how it looks.</p></details>
+      <details><summary data-i18n="faq.auto.q">Does it add furigana automatically?</summary><p data-i18n="faq.auto.a">No. You type the reading yourself inside 《 》. Typing it helps you remember it, and it lets the app work completely offline.</p></details>
+      <details><summary data-i18n="faq.sync.q">Can I sync between iPhone and iPad?</summary><p data-i18n="faq.sync.a">Not yet. For now, each device keeps its own notes. Syncing through iCloud is the next planned feature.</p></details>
+      <details><summary data-i18n="faq.android.q">Is there an Android version?</summary><p data-i18n="faq.android.a">Not yet. Justdown is for iPhone and iPad only for now.</p></details>
+      <details><summary data-i18n="faq.export.q">Can I move my notes to another app?</summary><p data-i18n="faq.export.a">Yes. Copy the text from the Code tab and paste it into any app. Notes are saved only on your device, so copy anything important before you delete the app.</p></details>
     </div>
   </div>
 </section>
@@ -410,68 +414,82 @@
   var I18N = {
     en: {},
     ja: {
-      "nav.demo": "ふりがな", "nav.features": "機能", "nav.notation": "記法", "nav.privacy": "プライバシー", "nav.store": "ダウンロード",
-      "hero.title": "マークダウンで書いて、<br><ruby>振<rt>ふ</rt></ruby>り<ruby>仮名<rt>がな</rt></ruby>で読む。",
-      "hero.sub": "日本語を学ぶ人のためのノートアプリ。読みは一度書くだけ。読むたびに、いつも漢字の上に。",
-      "hero.store": "App Store でダウンロード", "hero.try": "しくみを見る →", "hero.fine": "無料。アカウント不要。広告なし。iPhone と iPad。",
+      "nav.demo": "使い方", "nav.features": "機能", "nav.notation": "書き方", "nav.privacy": "プライバシー", "nav.store": "ダウンロード",
+      "hero.title": "<span class=\"nw\"><ruby>漢字<rt>かんじ</rt></ruby>の</span><span class=\"nw\">読みが、</span><br><span class=\"nw\">いつも上に</span><span class=\"nw\">見える</span><span class=\"nw\">ノート。</span>",
+      "hero.sub": "Justdown は日本語を勉強する人のためのメモアプリです。漢字と読みを一度書いておけば、絵本やマンガのふりがなのように、漢字の上に小さく読みが表示されます。",
+      "hero.store": "App Store でダウンロード", "hero.try": "例を見る →", "hero.fine": "無料。登録不要。広告なし。iPhone と iPad に対応。",
       "alt.code": "iPhone の Justdown：キーボード上に《 》ツールバーがある Code タブ",
       "alt.preview": "iPhone の Justdown：すべての漢字の上にふりがなが付いたプレビュー",
       "alt.ipad": "横向き iPad の Justdown：左にノート一覧、右にふりがな付きプレビュー",
-      "demo.eyebrow": "ふりがな", "demo.title": "<span class=\"accent\">漢字《かんじ》</span>と打つ。<br>本のように読める。",
-      "demo.sub": "青空文庫記法で入力すると、本物のルビになります。「あ」を押すと読みが隠れて、自分でテストできます。",
+      "demo.eyebrow": "使い方", "demo.title": "<span class=\"nw\">読みを《 》に</span><span class=\"nw\">書くと、</span><br><span class=\"nw\">漢字の上に</span><span class=\"nw\">表示されます。</span>",
+      "demo.sub": "漢字のすぐ後ろに、読みを《 》で囲んで書きます。Preview に切り替えると、読みが漢字の上に移ります。例の Code と Preview を切り替えてみてください。",
       "demo.hide": "ふりがなを隠す", "demo.show": "ふりがなを表示",
-      "demo.hint": "読みはその場で隠れます。行の高さが変わらないので、読んでいる位置がずれません。",
-      "feat.eyebrow": "機能", "feat.title": "ふつうのマークダウンエディタ。<br>足りなかったものを一つだけ。",
-      "f1.t": "ふりがながちゃんと出る", "f1.d": "漢字《かんじ》がプレビューで本物の ruby タグになります。読みの開始位置は ｜ で指定。",
-      "f2.t": "ノートごとに読みを隠す", "f2.d": "ワンタップでそのノートのふりがなをすべて隠して、読めるか確認。設定はノートごとに記憶されます。",
-      "f3.t": "キーボードツールバー", "f3.d": "日本語キーボードでは打ちにくい《 》と ｜ を、ワンタップで。",
-      "f4.t": "本物のマークダウン", "f4.d": "表、ハイライト付きコードブロック、Code / Preview タブ、見出しからの目次。",
-      "f5.t": "検索", "f5.d": "全ノート横断でも、ノート内でも。Code / Preview どちらでもマッチ間をジャンプ。",
-      "f6.t": "ライトとダーク", "f6.d": "夜の勉強にはダークテーマ。ノート一覧からすぐ切り替え。",
-      "not.eyebrow": "記法", "not.title": "ただのテキスト。<br>ずっと自分のもの。", "not.sub": "Justdown は青空文庫と同じふりがな記法を使います。ロックインなし。どこにでもコピーできます。",
-      "not.h1": "入力", "not.h2": "表示",
-      "not.p1": "漢字の直後に《 》で読みを書きます。読みを付けたい漢字が語の途中から始まるときは、その前に ｜ を置きます。コードブロックの中は変換しません。",
-      "not.p2": "パーサーは <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a> としてオープンソース公開しています（markdown-it プラグイン）。",
-      "priv.eyebrow": "プライバシー", "priv.title": "ノートは、<br>あなたの端末の中だけに。", "priv.sub": "Justdown にサーバーはなく、ネットワーク通信を一切行いません。",
-      "p1.t": "アカウント", "p1.d": "開いてすぐ書けます。", "p2.t": "トラッカー", "p2.d": "解析もクラッシュレポートもなし。", "p3.t": "広告", "p3.d": "無料で、課金への誘導もなし。", "p4.t": "端末内", "p4.d": "ノートはアプリ内ストレージにだけ。",
+      "demo.hint": "自分をテストしたいときは「あ」を押すと読みが隠れます。もう一度押すと元に戻ります。",
+      "feat.eyebrow": "機能", "feat.title": "<span class=\"nw\">シンプルな</span><span class=\"nw\">ノートに、</span><br><span class=\"nw\">日本語を</span><span class=\"nw\">読むための</span><span class=\"nw\">工夫を。</span>",
+      "f1.t": "漢字の上に読みを表示", "f1.d": "漢字《かんじ》と書くと、漢字の上に「かんじ」と小さく表示されます。特別なキーボードや設定はいりません。",
+      "f2.t": "読みを隠して確認テスト", "f2.d": "「あ」を押すとノートの読みがすべて隠れ、読めるかどうか確かめられます。表示・非表示はノートごとに記憶されます。",
+      "f3.t": "キーボードの上にショートカット", "f3.d": "《 》はふつうのキーボードでは探しにくい記号です。キーボードの上のボタンを押せば入力できます。",
+      "f4.t": "見出し・箇条書き・表", "f4.d": "行の頭に # を付けると見出し、- を付けると箇条書きになります（マークダウンという書き方です）。長いノートには見出しから目次が作られます。",
+      "f5.t": "検索", "f5.d": "すべてのノートから、または読んでいるノートの中から言葉を探せます。",
+      "f6.t": "ライトとダーク", "f6.d": "夜の勉強には目にやさしいダークテーマ。ノート一覧からいつでも切り替えられます。",
+      "not.eyebrow": "書き方", "not.title": "<span class=\"nw\">覚えるルールは</span><br><span class=\"nw\">ほとんど</span><span class=\"nw\">ありません。</span>",
+      "not.sub": "書き方は、日本の本を無料で読めるネット図書館「青空文庫」と同じです。ただの文字なので、ほかのアプリにそのままコピーしても読めます。",
+      "not.h1": "こう書くと", "not.h2": "こう表示",
+      "not.p1": "基本は、漢字のすぐ後ろに読みを《 》で書くだけ。「お土産」のように漢字が言葉の途中から始まるときは、漢字の前に ｜ を入れて、どこからが漢字かをアプリに伝えます。",
+      "not.p2": "開発者向け：《 》を変換する部分は <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a> としてオープンソースで公開しています。",
+      "priv.eyebrow": "プライバシー", "priv.title": "<span class=\"nw\">ノートは、</span><br><span class=\"nw\">あなたの</span><span class=\"nw\">端末の</span><span class=\"nw\">中だけに。</span>",
+      "priv.sub": "Justdown はインターネットに一切接続しません。会員登録もなく、書いた内容は開発者を含め誰にも見られません。",
+      "p1.t": "アカウント", "p1.d": "登録不要。開いてすぐ書けます。",
+      "p2.t": "トラッカー", "p2.d": "使い方の追跡やデータ収集はしません。",
+      "p3.t": "広告", "p3.d": "無料。広告もアプリ内課金もありません。",
+      "p4.t": "端末内", "p4.d": "ノートは iPhone・iPad の中にだけ保存されます。",
       "faq.eyebrow": "FAQ", "faq.title": "よくある質問",
-      "faq.1q": "ふりがなは自動で付きますか？", "faq.1a": "いいえ。読みは自分で《 》に書きます。読みを自分で打つことが学習の一部であり、完全オフラインを保つための意図的な仕様です。",
-      "faq.2q": "iPhone と iPad で同期できますか？", "faq.2a": "まだできません。iCloud 同期が次の予定機能です。",
-      "faq.3q": "Android 版はありますか？", "faq.3a": "現時点ではありません。今は iPhone と iPad のみ対応です。",
-      "faq.4q": "ノートを外に出せますか？", "faq.4a": "ノートはただのマークダウンです。Code タブからコピーしてどこにでも。《 》記法はそのままでも読めますし、青空文庫対応リーダーでも表示できます。",
+      "faq.what.q": "ふりがなとは？", "faq.what.a": "漢字の上や横に小さく書かれる、読み方を示すひらがなです。たとえば「漢字」の上の「かんじ」。子ども向けの本やマンガ、教科書でよく使われています。",
+      "faq.md.q": "マークダウンを知らなくても使えますか？", "faq.md.a": "はい。ふつうの文章をそのまま書けます。マークダウンは使っても使わなくてもいい記号のルールで、行の頭の # で見出し、- で箇条書きになります。Preview で仕上がりを確認できます。",
+      "faq.auto.q": "ふりがなは自動で付きますか？", "faq.auto.a": "いいえ。読みは自分で《 》の中に書きます。自分で打つことで覚えやすくなり、アプリも完全にオフラインで動きます。",
+      "faq.sync.q": "iPhone と iPad で同期できますか？", "faq.sync.a": "まだできません。今は端末ごとに別々のノートです。iCloud での同期が次に予定している機能です。",
+      "faq.android.q": "Android 版はありますか？", "faq.android.a": "まだありません。今は iPhone と iPad のみ対応しています。",
+      "faq.export.q": "ノートをほかのアプリに移せますか？", "faq.export.a": "はい。Code タブの文章をコピーして、どのアプリにも貼り付けられます。ノートはこの端末の中にだけ保存されるので、アプリを削除する前に大事なノートはコピーしておいてください。",
       "end.sub": "App Store で無料。",
       "foot.changelog": "更新履歴", "foot.privacy": "プライバシーポリシー", "foot.contact": "お問い合わせ"
     },
     ko: {
-      "nav.demo": "후리가나", "nav.features": "기능", "nav.notation": "표기법", "nav.privacy": "프라이버시", "nav.store": "다운로드",
-      "hero.title": "마크다운으로 쓰고,<br>후리가나를 달아 읽는다.",
-      "hero.sub": "일본어를 공부하는 사람을 위한 노트 앱. 읽는 법은 한 번만 쓰면, 읽을 때마다 언제나 한자 위에.",
-      "hero.store": "App Store에서 다운로드", "hero.try": "어떻게 되는지 보기 →", "hero.fine": "무료. 계정 없음. 광고 없음. iPhone과 iPad.",
+      "nav.demo": "사용법", "nav.features": "기능", "nav.notation": "작성법", "nav.privacy": "개인정보", "nav.store": "다운로드",
+      "hero.title": "모든 <ruby>漢字<rt>かんじ</rt></ruby> 위에<br>읽는 법이 보이는 노트.",
+      "hero.sub": "Justdown은 일본어를 공부하는 사람을 위한 메모 앱이에요. 한자와 읽는 법을 한 번 적어 두면, 일본 그림책이나 만화의 후리가나처럼 한자 위에 작은 글씨로 읽는 법이 표시돼요.",
+      "hero.store": "App Store에서 다운로드", "hero.try": "예시 보기 →", "hero.fine": "무료. 회원가입 없음. 광고 없음. iPhone과 iPad 지원.",
       "alt.code": "iPhone의 Justdown: 키보드 위에 《 》 툴바가 있는 Code 탭",
       "alt.preview": "iPhone의 Justdown: 모든 한자 위에 후리가나가 붙은 미리보기",
       "alt.ipad": "가로 방향 iPad의 Justdown: 왼쪽에 노트 목록, 오른쪽에 후리가나 미리보기",
-      "demo.eyebrow": "후리가나", "demo.title": "<span class=\"accent\">漢字《かんじ》</span>라고 치면,<br>책처럼 읽힙니다.",
-      "demo.sub": "아오조라 문고 표기로 쓰면 진짜 루비가 됩니다. あ를 누르면 읽는 법이 숨겨져 스스로 테스트할 수 있어요.",
+      "demo.eyebrow": "사용법", "demo.title": "읽는 법을 《 》에 적으면,<br>한자 위에 나타나요.",
+      "demo.sub": "한자 바로 뒤에 읽는 법을 《 》로 감싸서 적어요. Preview로 바꾸면 읽는 법이 한자 위로 올라가요. 예시에서 Code와 Preview를 눌러 보세요.",
       "demo.hide": "후리가나 숨기기", "demo.show": "후리가나 보이기",
-      "demo.hint": "읽는 법은 제자리에서 숨겨져요. 줄 높이가 그대로라 읽던 위치가 흔들리지 않습니다.",
-      "feat.eyebrow": "기능", "feat.title": "평범한 마크다운 에디터.<br>거기에 꼭 필요했던 하나.",
-      "f1.t": "후리가나가 제대로 나옴", "f1.d": "漢字《かんじ》가 미리보기에서 진짜 ruby 태그가 됩니다. 읽는 법 시작 위치는 ｜로 지정.",
-      "f2.t": "노트별로 읽는 법 숨기기", "f2.d": "한 번 탭하면 그 노트의 후리가나가 전부 숨겨져 읽을 수 있는지 확인. 설정은 노트마다 따로 기억됩니다.",
-      "f3.t": "키보드 툴바", "f3.d": "일본어 자판으로 치기 어려운 《 》와 ｜를 한 번에.",
-      "f4.t": "진짜 마크다운", "f4.d": "표, 구문 강조 코드 블록, Code / Preview 탭, 헤딩 기반 목차.",
-      "f5.t": "검색", "f5.d": "전체 노트에서도, 노트 안에서도. Code / Preview 양쪽에서 매치 이동.",
-      "f6.t": "라이트와 다크", "f6.d": "밤 공부엔 다크 테마. 노트 목록에서 바로 전환.",
-      "not.eyebrow": "표기법", "not.title": "그냥 텍스트.<br>영원히 내 것.", "not.sub": "Justdown은 일본 공공 도서관 아오조라 문고와 같은 후리가나 표기를 씁니다. 종속 없음. 어디든 복사하세요.",
-      "not.h1": "입력", "not.h2": "표시",
-      "not.p1": "한자 바로 뒤에 《 》로 읽는 법을 씁니다. 읽는 법을 붙일 한자가 단어 중간에서 시작하면 그 앞에 ｜를 둡니다. 코드 블록 안은 변환하지 않습니다.",
-      "not.p2": "파서는 <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a>로 오픈소스 공개했습니다(markdown-it 플러그인).",
-      "priv.eyebrow": "프라이버시", "priv.title": "내 노트는,<br>내 기기 안에만.", "priv.sub": "Justdown에는 서버가 없고 네트워크 통신을 전혀 하지 않습니다.",
-      "p1.t": "계정", "p1.d": "열자마자 바로 쓰기.", "p2.t": "트래커", "p2.d": "분석도 크래시 리포트도 없음.", "p3.t": "광고", "p3.d": "무료, 결제 유도 없음.", "p4.t": "기기 안에", "p4.d": "노트는 앱 내부 저장소에만.",
+      "demo.hint": "스스로 테스트하고 싶을 땐 あ를 누르면 읽는 법이 숨겨져요. 다시 누르면 돌아와요.",
+      "feat.eyebrow": "기능", "feat.title": "단순한 노트에,<br>일본어 읽기를 위한 기능을.",
+      "f1.t": "한자 위에 읽는 법 표시", "f1.d": "漢字《かんじ》라고 적으면 한자 위에 かんじ가 작게 표시돼요. 특별한 키보드나 설정은 필요 없어요.",
+      "f2.t": "읽는 법 숨기고 테스트", "f2.d": "あ를 누르면 노트의 읽는 법이 전부 숨겨져서, 읽을 수 있는지 확인할 수 있어요. 보이기·숨기기는 노트마다 따로 기억돼요.",
+      "f3.t": "키보드 위 단축 버튼", "f3.d": "《 》는 보통 키보드에서 찾기 어려운 기호예요. 키보드 위 버튼을 누르면 바로 입력돼요.",
+      "f4.t": "제목·목록·표", "f4.d": "줄 앞에 #을 붙이면 제목, -를 붙이면 목록이 돼요(마크다운이라는 작성 방식이에요). 긴 노트는 제목으로 목차가 만들어져요.",
+      "f5.t": "검색", "f5.d": "모든 노트에서, 또는 지금 읽는 노트 안에서 단어를 찾을 수 있어요.",
+      "f6.t": "라이트와 다크", "f6.d": "밤 공부엔 눈이 편한 다크 테마. 노트 목록에서 언제든 바꿀 수 있어요.",
+      "not.eyebrow": "작성법", "not.title": "외울 규칙이<br>거의 없어요.",
+      "not.sub": "작성법은 일본 책을 무료로 볼 수 있는 인터넷 도서관 '아오조라 문고'와 같아요. 그냥 글자라서 다른 앱에 그대로 복사해도 읽을 수 있어요.",
+      "not.h1": "이렇게 적으면", "not.h2": "이렇게 보여요",
+      "not.p1": "기본은 한자 바로 뒤에 읽는 법을 《 》로 적는 것뿐이에요. 'お土産'처럼 한자가 단어 중간에서 시작하면, 한자 앞에 ｜를 넣어서 어디부터 한자인지 앱에 알려 주세요.",
+      "not.p2": "개발자용: 《 》를 변환하는 부분은 <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a>로 오픈소스 공개했어요.",
+      "priv.eyebrow": "개인정보", "priv.title": "내 노트는,<br>내 기기 안에만.",
+      "priv.sub": "Justdown은 인터넷에 전혀 연결하지 않아요. 회원가입도 없고, 적은 내용은 개발자를 포함해 누구도 볼 수 없어요.",
+      "p1.t": "계정", "p1.d": "가입 없이 열자마자 바로 쓰기.",
+      "p2.t": "추적", "p2.d": "사용 기록 추적이나 데이터 수집이 없어요.",
+      "p3.t": "광고", "p3.d": "무료. 광고도 앱 내 결제도 없어요.",
+      "p4.t": "기기 안에", "p4.d": "노트는 iPhone·iPad 안에만 저장돼요.",
       "faq.eyebrow": "FAQ", "faq.title": "자주 묻는 질문",
-      "faq.1q": "후리가나가 자동으로 붙나요?", "faq.1a": "아니요. 읽는 법은 직접 《 》에 씁니다. 직접 치는 게 학습의 일부라고 보고, 완전 오프라인을 유지하기 위한 의도적인 선택입니다.",
-      "faq.2q": "iPhone과 iPad 사이 동기화되나요?", "faq.2a": "아직 안 됩니다. iCloud 동기화가 다음 예정 기능입니다.",
-      "faq.3q": "Android 버전이 있나요?", "faq.3a": "현재는 없습니다. 지금은 iPhone과 iPad만 지원합니다.",
-      "faq.4q": "노트를 밖으로 꺼낼 수 있나요?", "faq.4a": "노트는 그냥 마크다운입니다. Code 탭에서 복사해 어디든. 《 》 표기는 그대로도 읽히고 아오조라 문고 대응 리더에서도 표시됩니다.",
+      "faq.what.q": "후리가나가 뭔가요?", "faq.what.a": "한자 위나 옆에 작게 적어 읽는 법을 알려 주는 히라가나예요. 예를 들어 '漢字' 위의 'かんじ'요. 일본 어린이 책, 만화, 교과서에서 흔히 쓰여요.",
+      "faq.md.q": "마크다운을 몰라도 쓸 수 있나요?", "faq.md.a": "네. 평범한 글을 그대로 적으면 돼요. 마크다운은 써도 되고 안 써도 되는 몇 가지 기호예요. 줄 앞의 #은 제목, -는 목록이 되고, Preview에서 완성된 모습을 볼 수 있어요.",
+      "faq.auto.q": "후리가나가 자동으로 붙나요?", "faq.auto.a": "아니요. 읽는 법은 《 》 안에 직접 적어요. 직접 치면서 더 잘 외워지고, 앱도 인터넷 없이 완전히 오프라인으로 동작해요.",
+      "faq.sync.q": "iPhone과 iPad 사이에 동기화되나요?", "faq.sync.a": "아직 안 돼요. 지금은 기기마다 노트가 따로예요. iCloud 동기화가 다음 예정 기능이에요.",
+      "faq.android.q": "Android 버전이 있나요?", "faq.android.a": "아직 없어요. 지금은 iPhone과 iPad만 지원해요.",
+      "faq.export.q": "노트를 다른 앱으로 옮길 수 있나요?", "faq.export.a": "네. Code 탭의 글을 복사해서 어떤 앱에든 붙여 넣을 수 있어요. 노트는 이 기기 안에만 저장되니, 앱을 지우기 전에 중요한 노트는 꼭 복사해 두세요.",
       "end.sub": "App Store에서 무료.",
       "foot.changelog": "변경 이력", "foot.privacy": "개인정보 처리방침", "foot.contact": "문의"
     }
