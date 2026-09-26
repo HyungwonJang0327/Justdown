@@ -53,9 +53,14 @@ export function EditHeaderButtons({
           accessibilityRole="button"
           accessibilityLabel={ruby.hidden ? t('showRuby') : t('hideRuby')}
         >
-          {/* 가린 상태는 글자만 흐리게 */}
+          {/* 가린 상태는 흐리게 + 취소선 (색만으로는 구분이 어려움) */}
           <Text
-            style={[styles.rubyText, { color: ruby.hidden ? colors.subText : colors.text }]}
+            style={[
+              styles.rubyText,
+              ruby.hidden
+                ? { color: colors.subText, textDecorationLine: 'line-through' }
+                : { color: colors.text },
+            ]}
           >
             あ
           </Text>
