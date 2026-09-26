@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Justdown — Markdown notes with furigana</title>
+<meta name="description" content="Justdown is a markdown note app for Japanese learners. Write 漢字《かんじ》 in Aozora Bunko notation and read it with real furigana. Hide readings per note to quiz yourself. Local-only, no account, no ads. iPhone · iPad.">
+<link rel="canonical" href="https://hyungwonjang0327.github.io/Justdown/">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<meta name="apple-itunes-app" content="app-id=6805135080">
+<meta name="theme-color" content="#000000">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Justdown">
+<meta property="og:title" content="Justdown — Markdown notes with furigana">
+<meta property="og:description" content="Write 漢字《かんじ》, read it with furigana. A local-only markdown note app for Japanese learners on iPhone and iPad.">
+<meta property="og:url" content="https://hyungwonjang0327.github.io/Justdown/">
+<meta property="og:image" content="https://hyungwonjang0327.github.io/Justdown/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Justdown — Markdown notes with furigana">
+<meta name="twitter:description" content="Write 漢字《かんじ》, read it with furigana. Local-only markdown notes for Japanese learners.">
+<meta name="twitter:image" content="https://hyungwonjang0327.github.io/Justdown/assets/og.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Justdown",
+  "alternateName": ["Justdown 振り仮名メモ", "Justdown 후리가나 메모"],
+  "operatingSystem": "iOS, iPadOS",
+  "applicationCategory": "EducationalApplication",
+  "description": "Markdown note app for Japanese learners with furigana (yomigana) rendering using Aozora Bunko notation. Local-only, no account.",
+  "url": "https://hyungwonjang0327.github.io/Justdown/",
+  "installUrl": "https://apps.apple.com/app/justdown/id6805135080",
+  "image": "https://hyungwonjang0327.github.io/Justdown/assets/icon.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Hyungwon Jang", "url": "https://github.com/HyungwonJang0327" },
+  "inLanguage": ["en", "ja", "ko"]
+}
+</script>
+
+<style>
+  :root {
+    --ink: #1d1d1f; --ink-2: #6e6e73; --ink-3: #86868b;
+    --paper: #ffffff; --paper-2: #f5f5f7;
+    --night: #000000; --night-2: #161617; --night-ink: #f5f5f7; --night-ink-2: #a1a1a6;
+    --blue: #0071e3; --blue-hover: #0077ed; --link: #0066cc; --ruby: #2997ff;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Apple SD Gothic Neo", "Noto Sans KR", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: var(--sans); color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; line-height: 1.47; font-size: 17px; letter-spacing: -0.022em; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; height: auto; display: block; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+  .wrap-wide { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+  .center { text-align: center; }
+
+  h1, h2, h3 { margin: 0; letter-spacing: -0.015em; }
+  .hl { font-size: clamp(40px, 6vw, 72px); line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; }
+  .hl-md { font-size: clamp(32px, 4.6vw, 56px); line-height: 1.07; font-weight: 700; }
+  .sub { font-size: clamp(19px, 2.2vw, 26px); line-height: 1.3; font-weight: 400; margin: 14px auto 0; color: var(--ink-2); max-width: 720px; }
+  .dark .sub { color: var(--night-ink-2); }
+  .eyebrow { font-size: 14px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 14px; }
+  .dark .eyebrow { color: var(--night-ink-2); }
+  .dark a { color: var(--ruby); }
+
+  section { padding: 110px 0; }
+  .dark { background: var(--night); color: var(--night-ink); }
+  .gray { background: var(--paper-2); }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 20; background: rgba(0,0,0,0.8); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); color: #f5f5f7; }
+  nav .wrap { display: flex; align-items: center; height: 48px; gap: 26px; font-size: 13px; }
+  nav a { color: rgba(245,245,247,0.85); }
+  nav a:hover { color: #fff; text-decoration: none; }
+  nav .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; color: #fff; }
+  nav .brand img { width: 22px; height: 22px; }
+  nav .spacer { flex: 1; }
+  nav .links { display: flex; gap: 26px; }
+  .lang { display: flex; gap: 2px; }
+  .lang button { background: transparent; border: 0; color: rgba(245,245,247,0.6); font: inherit; font-size: 12px; padding: 4px 7px; border-radius: 6px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { color: #fff; background: rgba(255,255,255,0.16); }
+  .pill { display: inline-block; background: var(--blue); color: #fff !important; font-size: 13px; padding: 4px 12px; border-radius: 999px; }
+  .pill:hover { background: var(--blue-hover); text-decoration: none !important; }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 980px; font-size: 17px; background: var(--blue); color: #fff; min-width: 140px; }
+  .btn:hover { background: var(--blue-hover); text-decoration: none; }
+  .btn-outline { background: transparent; color: var(--link); border: 1px solid currentColor; }
+  .btn-outline:hover { background: var(--link); color: #fff; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+  .fine { font-size: 13px; color: var(--ink-3); margin-top: 16px; }
+  .dark .fine { color: var(--night-ink-2); }
+
+  /* hero */
+  .hero { padding: 90px 0 0; overflow: hidden; }
+  .hero .icon { width: 108px; height: 108px; margin: 0 auto 28px; filter: drop-shadow(0 12px 28px rgba(0,113,227,0.28)); }
+  .hero h1 rt { font-size: 0.32em; color: var(--blue); font-weight: 600; }
+  .hero-shot { margin: 64px auto 0; max-width: 1080px; padding: 0 22px; }
+  .hero-shot img { border-radius: 18px; }
+
+  /* demo */
+  .demo { max-width: 720px; margin: 56px auto 0; border-radius: 22px; background: var(--night-2); overflow: hidden; text-align: left; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+  .demo-bar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .tabs { display: flex; background: rgba(255,255,255,0.08); border-radius: 10px; padding: 3px; }
+  .tabs button { background: transparent; border: 0; color: var(--night-ink-2); font: inherit; font-size: 14px; font-weight: 600; padding: 5px 16px; border-radius: 8px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--blue); color: #fff; }
+  .ruby-toggle { margin-left: auto; background: rgba(255,255,255,0.08); border: 0; border-radius: 10px; width: 40px; height: 34px; cursor: pointer; font: inherit; font-size: 18px; font-weight: 700; color: #fff; }
+  .ruby-toggle[aria-pressed="true"] { color: var(--night-ink-2); text-decoration: line-through; }
+  .demo-body { padding: 26px 28px; min-height: 270px; font-size: 18px; color: var(--night-ink); }
+  .demo-body[hidden] { display: none; }
+  .demo-code { font-family: var(--mono); font-size: 15px; white-space: pre-wrap; line-height: 1.8; margin: 0; letter-spacing: 0; }
+  .demo-code .p { color: var(--ruby); }
+  .demo-prev h3 { font-size: 24px; margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .demo-prev p { margin: 0 0 12px; line-height: 2.2; }
+  .demo-prev ul { margin: 0; padding-left: 1.3em; line-height: 2.2; }
+  .demo-prev rt { font-size: 0.5em; color: var(--ruby); }
+  .demo.hide-ruby .demo-prev rt { visibility: hidden; }
+  .demo-hint { padding: 14px 28px 18px; font-size: 14px; color: var(--night-ink-2); border-top: 1px solid rgba(255,255,255,0.08); }
+
+  /* bento */
+  .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 56px; text-align: left; }
+  .tile { background: var(--paper); border-radius: 24px; padding: 34px 32px; display: flex; flex-direction: column; min-height: 280px; grid-column: span 2; }
+  .tile.wide { grid-column: span 3; }
+  .tile .glyph { font-size: 64px; font-weight: 700; line-height: 1; color: var(--blue); margin-bottom: auto; letter-spacing: -0.03em; }
+  .tile h3 { font-size: 24px; font-weight: 600; margin: 24px 0 6px; }
+  .tile p { margin: 0; color: var(--ink-2); font-size: 16px; line-height: 1.45; }
+  .tile.dark-tile { background: var(--night); color: var(--night-ink); }
+  .tile.dark-tile p { color: var(--night-ink-2); }
+  .tile.dark-tile .glyph { color: var(--ruby); }
+
+  /* phones */
+  .phones { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 760px; margin: 56px auto 0; }
+  .phones figure { margin: 0; text-align: center; }
+  .phones img { border-radius: 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .phones figcaption { margin-top: 20px; font-size: 17px; color: var(--ink-2); }
+
+  /* notation */
+  .notation { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 56px; align-items: center; text-align: left; }
+  .notation code { font-family: var(--mono); background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 8px; font-size: 0.92em; letter-spacing: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 17px; }
+  th, td { text-align: left; padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.12); vertical-align: middle; }
+  th { color: var(--night-ink-2); font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; }
+  td rt { font-size: 0.5em; color: var(--ruby); }
+  td:last-child { font-size: 22px; }
+  .table-wrap { overflow-x: auto; }
+  .notation p { color: var(--night-ink-2); font-size: 17px; margin: 0 0 16px; }
+
+  /* privacy */
+  .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 56px; }
+  .cols .big { font-size: 44px; font-weight: 700; color: var(--blue); letter-spacing: -0.03em; }
+  .cols h3 { font-size: 19px; font-weight: 600; margin: 6px 0 4px; }
+  .cols p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+  /* faq */
+  .faq { max-width: 720px; margin: 40px auto 0; text-align: left; }
+  details { border-bottom: 1px solid #d2d2d7; padding: 20px 0; }
+  summary { cursor: pointer; font-weight: 600; font-size: 19px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--ink-3); font-weight: 400; font-size: 24px; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 12px 0 0; color: var(--ink-2); font-size: 17px; }
+
+  footer { background: var(--paper-2); color: var(--ink-3); font-size: 12px; padding: 20px 0 30px; border-top: 1px solid #d2d2d7; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; }
+  footer a { color: #424245; }
+  footer .spacer { flex: 1; }
+
+  @media (max-width: 820px) {
+    section { padding: 72px 0; }
+    .hero { padding-top: 56px; }
+    .bento { grid-template-columns: 1fr 1fr; }
+    .tile, .tile.wide { grid-column: span 1; min-height: 220px; }
+    .notation { grid-template-columns: 1fr; }
+    .cols { grid-template-columns: 1fr 1fr; }
+    nav .links { display: none; }
+  }
+  @media (max-width: 520px) {
+    .bento, .cols, .phones { grid-template-columns: 1fr; }
+    .phones { gap: 32px; }
+    nav .wrap { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="assets/icon.png" alt="" width="22" height="22">Justdown</a>
+    <div class="links">
+      <a href="#demo" data-i18n="nav.demo">Furigana</a>
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#notation" data-i18n="nav.notation">Notation</a>
+      <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+    </div>
+    <div class="spacer"></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
+      <button type="button" data-lang="ko" aria-pressed="false">한국어</button>
+    </div>
+    <a class="pill" href="https://apps.apple.com/app/justdown/id6805135080" data-i18n="nav.store">Download</a>
+  </div>
+</nav>
+
+<header class="hero center">
+  <div class="wrap">
+    <img class="icon" src="assets/icon.png" alt="" width="108" height="108">
+    <h1 class="hl" data-i18n-html="hero.title">Markdown.<br>Now with <ruby>振<rt>ふ</rt></ruby>り<ruby>仮名<rt>がな</rt></ruby>.</h1>
+    <p class="sub" data-i18n-html="hero.sub">The note app for people learning Japanese.<br>Write the reading once. See it above the kanji, every time.</p>
+    <div class="cta">
+      <a class="btn" href="https://apps.apple.com/app/justdown/id6805135080" data-i18n="hero.store">Download on the App Store</a>
+      <a class="btn btn-outline" href="#demo" data-i18n="hero.try">See how it works</a>
+    </div>
+    <p class="fine" data-i18n="hero.fine">Free. No account. No ads. iPhone and iPad.</p>
+  </div>
+  <div class="hero-shot">
+    <img src="assets/ipad.webp" alt="Justdown on iPad in landscape: note list sidebar on the left, preview with furigana on the right" width="1400" height="1050">
+  </div>
+</header>
+
+<section id="demo" class="dark center">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="demo.eyebrow">Furigana</p>
+    <h2 class="hl-md" data-i18n-html="demo.title">Type <span style="color:var(--ruby)">漢字《かんじ》</span>.<br>Read it like a book.</h2>
+    <p class="sub" data-i18n="demo.sub">Aozora Bunko notation in, real ruby text out. Tap あ to hide the readings and quiz yourself.</p>
+    <div class="demo" id="demoBox">
+      <div class="demo-bar">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" aria-selected="false" data-tab="code">Code</button>
+          <button type="button" role="tab" aria-selected="true" data-tab="preview">Preview</button>
+        </div>
+        <button type="button" class="ruby-toggle" id="rubyToggle" aria-pressed="false" data-i18n-title="demo.toggle" title="Hide furigana">あ</button>
+      </div>
+      <pre class="demo-body demo-code" data-tab-panel="code" hidden># <span class="p">面接《めんせつ》</span>の<span class="p">準備《じゅんび》</span>
+
+## <span class="p">自己紹介《じこしょうかい》</span>
+
+<span class="p">私《わたし》</span>は<span class="p">3年間《ねんかん》</span>、モバイルアプリを<span class="p">開発《かいはつ》</span>してきました。
+
+## <span class="p">想定質問《そうていしつもん》</span>
+
+- <span class="p">長所《ちょうしょ》</span>と<span class="p">短所《たんしょ》</span>は？
+- <span class="p">｜挫折《ざせつ》</span>した<span class="p">経験《けいけん》</span>は？</pre>
+      <div class="demo-body demo-prev" data-tab-panel="preview" lang="ja">
+        <h3><ruby>面接<rt>めんせつ</rt></ruby>の<ruby>準備<rt>じゅんび</rt></ruby></h3>
+        <p><strong><ruby>自己紹介<rt>じこしょうかい</rt></ruby></strong></p>
+        <p><ruby>私<rt>わたし</rt></ruby>は<ruby>3年間<rt>ねんかん</rt></ruby>、モバイルアプリを<ruby>開発<rt>かいはつ</rt></ruby>してきました。</p>
+        <p><strong><ruby>想定質問<rt>そうていしつもん</rt></ruby></strong></p>
+        <ul>
+          <li><ruby>長所<rt>ちょうしょ</rt></ruby>と<ruby>短所<rt>たんしょ</rt></ruby>は？</li>
+          <li><ruby>挫折<rt>ざせつ</rt></ruby>した<ruby>経験<rt>けいけん</rt></ruby>は？</li>
+        </ul>
+      </div>
+      <div class="demo-hint" data-i18n="demo.hint">Readings hide in place — the line height never changes, so nothing jumps while you read.</div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="gray center">
+  <div class="wrap-wide">
+    <p class="eyebrow" data-i18n="feat.eyebrow">Features</p>
+    <h2 class="hl-md" data-i18n-html="feat.title">A plain markdown editor.<br>Plus the one thing you needed.</h2>
+    <div class="bento">
+      <div class="tile wide dark-tile"><div class="glyph">《》</div><h3 data-i18n="f1.t">Furigana that renders</h3><p data-i18n="f1.d">漢字《かんじ》 becomes a real ruby tag in the preview. Use ｜ to mark where the reading begins.</p></div>
+      <div class="tile wide"><div class="glyph">あ</div><h3 data-i18n="f2.t">Hide readings per note</h3><p data-i18n="f2.d">One tap hides every furigana in a note so you can test yourself. Each note remembers its own setting.</p></div>
+      <div class="tile"><div class="glyph">⌨</div><h3 data-i18n="f3.t">Keyboard toolbar</h3><p data-i18n="f3.d">《 》 and ｜ are hard to type on a Japanese keyboard. One tap from the toolbar.</p></div>
+      <div class="tile"><div class="glyph">MD</div><h3 data-i18n="f4.t">Real markdown</h3><p data-i18n="f4.d">Tables, code blocks with highlighting, Code / Preview tabs, a table of contents from your headings.</p></div>
+      <div class="tile"><div class="glyph">⌕</div><h3 data-i18n="f5.t">Search everything</h3><p data-i18n="f5.d">Across all notes, or inside one — jumping between matches in both Code and Preview.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="screens" class="center">
+  <div class="wrap">
+    <p class="eyebrow">iPhone</p>
+    <h2 class="hl-md" data-i18n="shots.title">Type it. Read it.</h2>
+    <p class="sub" data-i18n="shots.sub">Two tabs. Code is what you write, Preview is what you study.</p>
+    <div class="phones">
+      <figure><img src="assets/iphone-code.webp" alt="Justdown on iPhone: Code tab with the 《 》 keyboard toolbar" width="600" height="1304" loading="lazy"><figcaption data-i18n="shots.code">Code — with the 《 》 toolbar above the keyboard</figcaption></figure>
+      <figure><img src="assets/iphone-preview.webp" alt="Justdown on iPhone: preview with furigana above every kanji" width="600" height="1304" loading="lazy"><figcaption data-i18n="shots.preview">Preview — readings above every kanji</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="notation" class="dark center">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="not.eyebrow">Notation</p>
+    <h2 class="hl-md" data-i18n-html="not.title">Plain text.<br>Yours forever.</h2>
+    <p class="sub" data-i18n="not.sub">Justdown uses the same furigana markup as Aozora Bunko, Japan's public-domain library. No lock-in — copy it anywhere.</p>
+    <div class="notation">
+      <div class="table-wrap">
+        <table lang="ja">
+          <thead><tr><th data-i18n="not.h1">You type</th><th data-i18n="not.h2">You see</th></tr></thead>
+          <tbody>
+            <tr><td><code>漢字《かんじ》</code></td><td><ruby>漢字<rt>かんじ</rt></ruby></td></tr>
+            <tr><td><code>お｜土産《みやげ》</code></td><td>お<ruby>土産<rt>みやげ</rt></ruby></td></tr>
+            <tr><td><code>見《み》る</code></td><td><ruby>見<rt>み</rt></ruby>る</td></tr>
+            <tr><td><code>&lt;ruby&gt;日本&lt;rt&gt;にほん&lt;/rt&gt;&lt;/ruby&gt;</code></td><td><ruby>日本<rt>にほん</rt></ruby></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p data-i18n="not.p1">The reading goes right after the kanji in 《 》. When the kanji run starts mid-word, put ｜ before it so the reading attaches to the right characters. Inside code blocks nothing is converted.</p>
+        <p data-i18n-html="not.p2">The parser is open source as <a href="https://www.npmjs.com/package/markdown-it-aozora-ruby">markdown-it-aozora-ruby</a>, a markdown-it plugin you can use in your own project.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="center">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="priv.eyebrow">Privacy</p>
+    <h2 class="hl-md" data-i18n-html="priv.title">Your notes. Your device.<br>Nothing else.</h2>
+    <p class="sub" data-i18n="priv.sub">Justdown has no server and never opens a network connection.</p>
+    <div class="cols">
+      <div><div class="big">0</div><h3 data-i18n="p1.t">Accounts</h3><p data-i18n="p1.d">Open the app and write.</p></div>
+      <div><div class="big">0</div><h3 data-i18n="p2.t">Trackers</h3><p data-i18n="p2.d">No analytics, no crash reporter.</p></div>
+      <div><div class="big">0</div><h3 data-i18n="p3.t">Ads</h3><p data-i18n="p3.d">Free, with nothing to upsell.</p></div>
+      <div><div class="big">100%</div><h3 data-i18n="p4.t">On device</h3><p data-i18n="p4.d">Notes live only in the app's storage.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="gray center">
+  <div class="wrap">
+    <h2 class="hl-md" data-i18n="faq.title">Questions</h2>
+    <div class="faq">
+      <details><summary data-i18n="faq.1q">Does it add furigana automatically?</summary><p data-i18n="faq.1a">No. You write the reading yourself in 《 》. That's deliberate — typing the reading is part of learning it, and it keeps the app fully offline.</p></details>
+      <details><summary data-i18n="faq.2q">Can I sync between iPhone and iPad?</summary><p data-i18n="faq.2a">Not yet. iCloud sync is the next planned feature.</p></details>
+      <details><summary data-i18n="faq.3q">Is there an Android version?</summary><p data-i18n="faq.3a">Not at the moment. Justdown is iPhone and iPad only for now.</p></details>
+      <details><summary data-i18n="faq.4q">How do I get my notes out?</summary><p data-i18n="faq.4a">Notes are plain markdown. Copy from the Code tab and paste anywhere — the 《 》 notation reads fine on its own and works in Aozora Bunko-compatible readers.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="dark center" style="padding:80px 0">
+  <div class="wrap">
+    <h2 class="hl-md">Justdown</h2>
+    <p class="sub" data-i18n="end.sub">Free on the App Store.</p>
+    <div class="cta"><a class="btn" href="https://apps.apple.com/app/justdown/id6805135080" data-i18n="hero.store">Download on the App Store</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Copyright © 2026 Hyungwon Jang. All rights reserved.</span>
+    <div class="spacer"></div>
+    <a href="https://github.com/HyungwonJang0327/Justdown">GitHub</a>
+    <a href="https://github.com/HyungwonJang0327/Justdown/blob/master/CHANGELOG.md" data-i18n="foot.changelog">Changelog</a>
+    <a href="https://hyungwonjang0327.github.io/justdown-privacy/" data-i18n="foot.privacy">Privacy Policy</a>
+    <a href="mailto:hyungwonjang0327@gmail.com" data-i18n="foot.contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var I18N = {
+    en: {},
+    ja: {
+      "nav.demo": "ふりがな", "nav.features": "機能", "nav.notation": "記法", "nav.privacy": "プライバシー", "nav.store": "ダウンロード",
+      "hero.title": "マークダウンに、<br><ruby>振<rt>ふ</rt></ruby>り<ruby>仮名<rt>がな</rt></ruby>を。",
+      "hero.sub": "日本語を学ぶ人のためのノートアプリ。<br>読みは一度書くだけ。プレビューではいつも漢字の上に。",
+      "hero.store": "App Store でダウンロード", "hero.try": "しくみを見る", "hero.fine": "無料。アカウント不要。広告なし。iPhone と iPad。",
+      "demo.eyebrow": "ふりがな", "demo.title": "<span style=\"color:var(--ruby)\">漢字《かんじ》</span>と打つ。<br>本のように読める。",
+      "demo.sub": "青空文庫記法で入力すると、本物のルビになります。「あ」を押すと読みが隠れて、自分でテストできます。",
+      "demo.toggle": "ふりがなを隠す", "demo.hint": "読みはその場で隠れます。行の高さが変わらないので、読んでいる位置がずれません。",
+      "feat.eyebrow": "機能", "feat.title": "ふつうのマークダウンエディタ。<br>足りなかったものを一つだけ。",
+      "f1.t": "ふりがながちゃんと出る", "f1.d": "漢字《かんじ》がプレビューで本物の ruby タグになります。読みの開始位置は ｜ で指定。",
+      "f2.t": "ノートごとに読みを隠す", "f2.d": "ワンタップでそのノートのふりがなをすべて隠して、読めるか確認。設定はノートごとに記憶されます。",
+      "f3.t": "キーボードツールバー", "f3.d": "日本語キーボードでは打ちにくい《 》と ｜ を、ワンタップで。",
+      "f4.t": "本物のマークダウン", "f4.d": "表、ハイライト付きコードブロック、Code / Preview タブ、見出しからの目次。",
+      "f5.t": "検索", "f5.d": "全ノート横断でも、ノート内でも。Code / Preview どちらでもマッチ間をジャンプ。",
+      "shots.title": "書く。読む。", "shots.sub": "タブは二つ。Code は書くもの、Preview は学ぶもの。",
+      "shots.code": "Code — キーボード上の《 》ツールバー", "shots.preview": "Preview — すべての漢字の上に読み",
+      "not.eyebrow": "記法", "not.title": "ただのテキスト。<br>ずっと自分のもの。", "not.sub": "Justdown は青空文庫と同じふりがな記法を使います。ロックインなし。どこにでもコピーできます。",
+      "not.h1": "入力", "not.h2": "表示",
+      "not.p1": "漢字の直後に《 》で読みを書きます。読みを付けたい漢字が語の途中から始まるときは、その前に ｜ を置きます。コードブロックの中は変換しません。",
+      "not.p2": "パーサーは <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a> としてオープンソース公開しています（markdown-it プラグイン）。",
+      "priv.eyebrow": "プライバシー", "priv.title": "あなたのノートは、<br>あなたの端末にだけ。", "priv.sub": "Justdown にサーバーはなく、ネットワーク通信を一切行いません。",
+      "p1.t": "アカウント", "p1.d": "開いてすぐ書けます。", "p2.t": "トラッカー", "p2.d": "解析もクラッシュレポートもなし。", "p3.t": "広告", "p3.d": "無料で、課金への誘導もなし。", "p4.t": "端末内", "p4.d": "ノートはアプリ内ストレージにだけ。",
+      "faq.title": "よくある質問",
+      "faq.1q": "ふりがなは自動で付きますか？", "faq.1a": "いいえ。読みは自分で《 》に書きます。読みを自分で打つことが学習の一部であり、完全オフラインを保つための意図的な仕様です。",
+      "faq.2q": "iPhone と iPad で同期できますか？", "faq.2a": "まだできません。iCloud 同期が次の予定機能です。",
+      "faq.3q": "Android 版はありますか？", "faq.3a": "現時点ではありません。今は iPhone と iPad のみ対応です。",
+      "faq.4q": "ノートを外に出せますか？", "faq.4a": "ノートはただのマークダウンです。Code タブからコピーしてどこにでも。《 》記法はそのままでも読めますし、青空文庫対応リーダーでも表示できます。",
+      "end.sub": "App Store で無料。",
+      "foot.changelog": "更新履歴", "foot.privacy": "プライバシーポリシー", "foot.contact": "お問い合わせ"
+    },
+    ko: {
+      "nav.demo": "후리가나", "nav.features": "기능", "nav.notation": "표기법", "nav.privacy": "프라이버시", "nav.store": "다운로드",
+      "hero.title": "마크다운에,<br>후리가나를.",
+      "hero.sub": "일본어를 공부하는 사람을 위한 노트 앱.<br>읽는 법은 한 번만 쓰세요. 미리보기에선 언제나 한자 위에.",
+      "hero.store": "App Store에서 다운로드", "hero.try": "어떻게 되는지 보기", "hero.fine": "무료. 계정 없음. 광고 없음. iPhone과 iPad.",
+      "demo.eyebrow": "후리가나", "demo.title": "<span style=\"color:var(--ruby)\">漢字《かんじ》</span>라고 치면,<br>책처럼 읽힙니다.",
+      "demo.sub": "아오조라 문고 표기로 쓰면 진짜 루비가 됩니다. あ를 누르면 읽는 법이 숨겨져 스스로 테스트할 수 있어요.",
+      "demo.toggle": "후리가나 숨기기", "demo.hint": "읽는 법은 제자리에서 숨겨져요. 줄 높이가 그대로라 읽던 위치가 흔들리지 않습니다.",
+      "feat.eyebrow": "기능", "feat.title": "평범한 마크다운 에디터.<br>거기에 꼭 필요했던 하나.",
+      "f1.t": "후리가나가 제대로 나옴", "f1.d": "漢字《かんじ》가 미리보기에서 진짜 ruby 태그가 됩니다. 읽는 법 시작 위치는 ｜로 지정.",
+      "f2.t": "노트별로 읽는 법 숨기기", "f2.d": "한 번 탭하면 그 노트의 후리가나가 전부 숨겨져 읽을 수 있는지 확인. 설정은 노트마다 따로 기억됩니다.",
+      "f3.t": "키보드 툴바", "f3.d": "일본어 자판으로 치기 어려운 《 》와 ｜를 한 번에.",
+      "f4.t": "진짜 마크다운", "f4.d": "표, 구문 강조 코드 블록, Code / Preview 탭, 헤딩 기반 목차.",
+      "f5.t": "검색", "f5.d": "전체 노트에서도, 노트 안에서도. Code / Preview 양쪽에서 매치 이동.",
+      "shots.title": "쓴다. 읽는다.", "shots.sub": "탭은 둘. Code는 쓰는 곳, Preview는 공부하는 곳.",
+      "shots.code": "Code — 키보드 위 《 》 툴바", "shots.preview": "Preview — 모든 한자 위에 읽는 법",
+      "not.eyebrow": "표기법", "not.title": "그냥 텍스트.<br>영원히 내 것.", "not.sub": "Justdown은 일본 공공 도서관 아오조라 문고와 같은 후리가나 표기를 씁니다. 종속 없음. 어디든 복사하세요.",
+      "not.h1": "입력", "not.h2": "표시",
+      "not.p1": "한자 바로 뒤에 《 》로 읽는 법을 씁니다. 읽는 법을 붙일 한자가 단어 중간에서 시작하면 그 앞에 ｜를 둡니다. 코드 블록 안은 변환하지 않습니다.",
+      "not.p2": "파서는 <a href=\"https://www.npmjs.com/package/markdown-it-aozora-ruby\">markdown-it-aozora-ruby</a>로 오픈소스 공개했습니다(markdown-it 플러그인).",
+      "priv.eyebrow": "프라이버시", "priv.title": "내 노트는,<br>내 기기에만.", "priv.sub": "Justdown에는 서버가 없고 네트워크 통신을 전혀 하지 않습니다.",
+      "p1.t": "계정", "p1.d": "열자마자 바로 쓰기.", "p2.t": "트래커", "p2.d": "분석도 크래시 리포트도 없음.", "p3.t": "광고", "p3.d": "무료, 결제 유도 없음.", "p4.t": "기기 안에", "p4.d": "노트는 앱 내부 저장소에만.",
+      "faq.title": "자주 묻는 질문",
+      "faq.1q": "후리가나가 자동으로 붙나요?", "faq.1a": "아니요. 읽는 법은 직접 《 》에 씁니다. 직접 치는 게 학습의 일부라고 보고, 완전 오프라인을 유지하기 위한 의도적인 선택입니다.",
+      "faq.2q": "iPhone과 iPad 사이 동기화되나요?", "faq.2a": "아직 안 됩니다. iCloud 동기화가 다음 예정 기능입니다.",
+      "faq.3q": "Android 버전이 있나요?", "faq.3a": "현재는 없습니다. 지금은 iPhone과 iPad만 지원합니다.",
+      "faq.4q": "노트를 밖으로 꺼낼 수 있나요?", "faq.4a": "노트는 그냥 마크다운입니다. Code 탭에서 복사해 어디든. 《 》 표기는 그대로도 읽히고 아오조라 문고 대응 리더에서도 표시됩니다.",
+      "end.sub": "App Store에서 무료.",
+      "foot.changelog": "변경 이력", "foot.privacy": "개인정보 처리방침", "foot.contact": "문의"
+    }
+  };
+  var sel = '[data-i18n],[data-i18n-html],[data-i18n-title]', defaults = [];
+  var els = Array.prototype.slice.call(document.querySelectorAll(sel));
+  els.forEach(function (el) {
+    el._k = el.dataset.i18n || el.dataset.i18nHtml || el.dataset.i18nTitle;
+    el._d = el.dataset.i18nTitle ? el.title : el.innerHTML;
+  });
+  function apply(lang) {
+    var dict = I18N[lang] || {};
+    els.forEach(function (el) {
+      var v = dict[el._k] != null ? dict[el._k] : el._d;
+      if (el.dataset.i18nTitle) el.title = v; else el.innerHTML = v;
+    });
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
+    try { localStorage.setItem('justdown.lang', lang); } catch (e) {}
+  }
+  var initial = '';
+  try { initial = localStorage.getItem('justdown.lang') || ''; } catch (e) {}
+  if (!initial) {
+    var nl = (navigator.language || 'en').toLowerCase();
+    initial = nl.indexOf('ja') === 0 ? 'ja' : nl.indexOf('ko') === 0 ? 'ko' : 'en';
+  }
+  apply(initial);
+  document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.lang); }); });
+
+  var demo = document.getElementById('demoBox');
+  demo.querySelectorAll('[role=tab]').forEach(function (t) {
+    t.addEventListener('click', function () {
+      demo.querySelectorAll('[role=tab]').forEach(function (x) { x.setAttribute('aria-selected', String(x === t)); });
+      demo.querySelectorAll('[data-tab-panel]').forEach(function (p) { p.hidden = p.dataset.tabPanel !== t.dataset.tab; });
+    });
+  });
+  var rt = document.getElementById('rubyToggle');
+  rt.addEventListener('click', function () {
+    var on = rt.getAttribute('aria-pressed') !== 'true';
+    rt.setAttribute('aria-pressed', String(on));
+    demo.classList.toggle('hide-ruby', on);
+  });
+})();
+</script>
+</body>
+</html>
