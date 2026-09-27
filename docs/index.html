@@ -134,6 +134,18 @@
   .stack .back { left: 0; top: 0; }
   .stack .front { right: 0; bottom: 0; }
 
+  /* 소개 영상: 썸네일만 먼저 보여 주고, 누를 때 YouTube(nocookie)를 불러온다 */
+  .video-section { border-top: 1px solid var(--rule); }
+  .video-frame { position: relative; margin: 0 auto; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); box-shadow: var(--shadow); background: #000; }
+  .video-frame.short { aspect-ratio: 9 / 16; width: 100%; max-width: 340px; }
+  .video-frame.wide { aspect-ratio: 16 / 9; width: 100%; }
+  /* 가로 영상은 2단 안에선 작아서, 글 아래에 전체 폭으로 */
+  .video-section.is-wide .split { grid-template-columns: 1fr; gap: 40px; }
+  .video-frame img, .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+  .video-play { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+  .video-play::after { content: ""; position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: rgba(0, 0, 0, 0.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M8 5v14l11-7z'/%3E%3C/svg%3E") center / 34px no-repeat; transition: transform 0.15s, background-color 0.15s; }
+  .video-play:hover::after { transform: scale(1.06); background-color: rgba(0, 0, 0, 0.78); }
+
   /* demo */
   .split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 64px; align-items: center; }
   .demo { border-radius: var(--radius); background: var(--card); border: 1px solid var(--rule); box-shadow: var(--shadow); overflow: hidden; }
@@ -279,6 +291,17 @@
     </div>
   </div>
 </header>
+
+<section id="video" class="video-section" hidden>
+  <div class="wrap split">
+    <div>
+      <span class="label" data-i18n="video.eyebrow">Video</span>
+      <h2 data-i18n-html="video.title">See it<br>in action.</h2>
+      <p class="lede" data-i18n="video.sub">Why I built it, and what it looks like in use — in a short video.</p>
+    </div>
+    <div class="video-frame short" id="videoFrame"></div>
+  </div>
+</section>
 
 <section id="demo" class="band">
   <div class="wrap split">
@@ -435,6 +458,7 @@
       "alt.preview": "iPhone の Justdown：すべての漢字の上にふりがなが付いたプレビュー",
       "alt.theme": "横向き iPad の Justdown がライトとダークで切り替わる様子：左にノート一覧、右にふりがな付きプレビュー",
       "theme.caption": "ライトとダークはワンタップで切り替え。iPad ではノート一覧とプレビューを並べて表示します。",
+      "video.eyebrow": "動画", "video.title": "<span class=\"nw\">動画で</span><br><span class=\"nw\">見てみる。</span>", "video.sub": "作った理由と実際の使い方を、短い動画にまとめました。", "video.play": "動画を再生",
       "demo.eyebrow": "使い方", "demo.title": "<span class=\"nw\">読みを《 》に</span><span class=\"nw\">書くと、</span><br><span class=\"nw\">漢字の上に</span><span class=\"nw\">表示されます。</span>",
       "demo.sub": "漢字のすぐ後ろに、読みを《 》で囲んで書きます。Preview に切り替えると、読みが漢字の上に移ります。例の Code と Preview を切り替えてみてください。",
       "demo.hide": "ふりがなを隠す", "demo.show": "ふりがなを表示",
@@ -476,6 +500,7 @@
       "alt.preview": "iPhone의 Justdown: 모든 한자 위에 후리가나가 붙은 미리보기",
       "alt.theme": "가로 방향 iPad의 Justdown이 라이트와 다크로 바뀌는 모습: 왼쪽에 노트 목록, 오른쪽에 후리가나 미리보기",
       "theme.caption": "라이트와 다크는 한 번 탭으로 전환. iPad에서는 노트 목록과 미리보기를 나란히 보여 줘요.",
+      "video.eyebrow": "영상", "video.title": "영상으로<br>먼저 보기.", "video.sub": "만든 이유와 실제로 쓰는 모습을 짧은 영상에 담았어요.", "video.play": "영상 재생",
       "demo.eyebrow": "사용법", "demo.title": "읽는 법을 《 》에 적으면,<br>한자 위에 나타나요.",
       "demo.sub": "한자 바로 뒤에 읽는 법을 《 》로 감싸서 적어요. Preview로 바꾸면 읽는 법이 한자 위로 올라가요. 예시에서 Code와 Preview를 눌러 보세요.",
       "demo.hide": "후리가나 숨기기", "demo.show": "후리가나 보이기",
@@ -510,7 +535,7 @@
     }
   };
   // 영어는 마크업에 있는 원문을 기본값으로 쓴다
-  var EN_TOGGLE = { "demo.hide": "Hide furigana", "demo.show": "Show furigana" };
+  var EN_TOGGLE = { "demo.hide": "Hide furigana", "demo.show": "Show furigana", "video.play": "Play video" };
   var lang = 'en';
   var els = Array.prototype.slice.call(document.querySelectorAll('[data-i18n],[data-i18n-html],[data-i18n-alt]'));
   els.forEach(function (el) {
@@ -539,8 +564,53 @@
     document.documentElement.lang = lang;
     document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
     syncToggleLabel();
+    renderVideo();
     try { localStorage.setItem('justdown.lang', lang); } catch (e) {}
   }
+
+  // 언어별 소개 영상. 넓은 화면은 가로(wide), 휴대폰은 쇼츠(short). 가로가 없으면 쇼츠를 쓴다
+  var VIDEOS = {
+    ko: { short: 'YTgX00PrM9E' },
+    ja: { short: '-o3vghfR2MY', wide: 'jWyvZsM1-VI' },
+    en: { short: '5YGPbo9Z5Ac', wide: 'X1VcmHNeP6Q' }
+  };
+  var videoSection = document.getElementById('video');
+  var videoFrame = document.getElementById('videoFrame');
+  var wideScreen = window.matchMedia('(min-width: 900px)');
+  function renderVideo() {
+    var v = VIDEOS[lang];
+    videoSection.hidden = !v;
+    if (!v) return;
+    var wide = wideScreen.matches && !!v.wide;
+    var id = wide ? v.wide : v.short;
+    if (videoFrame.dataset.id === id) return; // 재생 중인 영상은 그대로 둔다
+    videoFrame.dataset.id = id;
+    videoFrame.className = 'video-frame ' + (wide ? 'wide' : 'short');
+    videoSection.classList.toggle('is-wide', wide);
+    videoFrame.textContent = '';
+    // 썸네일은 직접 호스팅: 누르기 전까지 YouTube(Google)에 아무 요청도 보내지 않는다
+    var img = document.createElement('img');
+    img.src = 'assets/video/' + id + '.webp';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    var play = document.createElement('button');
+    play.type = 'button';
+    play.className = 'video-play';
+    play.setAttribute('aria-label', tr('video.play'));
+    play.addEventListener('click', function () {
+      var frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0';
+      frame.title = tr('video.play');
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      frame.allowFullscreen = true;
+      videoFrame.textContent = '';
+      videoFrame.appendChild(frame);
+    });
+    videoFrame.appendChild(img);
+    videoFrame.appendChild(play);
+  }
+  if (wideScreen.addEventListener) wideScreen.addEventListener('change', renderVideo);
 
   var initial = '';
   try { initial = localStorage.getItem('justdown.lang') || ''; } catch (e) {}
