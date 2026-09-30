@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AppState,
+  BackHandler,
   InputAccessoryView,
   Keyboard,
   KeyboardAvoidingView,
@@ -229,6 +230,21 @@ export default function NoteEditPane({
       persist(contentRef.current);
     }
   }, [persist]);
+
+  // Android 뒤로가기: 목차·찾기 창이 열려 있으면 화면을 나가지 않고 창만 닫는다
+  const closeFindRef = useRef(closeFind);
+  useEffect(() => {
+    closeFindRef.current = closeFind;
+  });
+  useEffect(() => {
+    if (Platform.OS !== 'android' || (!tocVisible && !findVisible)) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (tocVisible) onRequestCloseToc();
+      else closeFindRef.current();
+      return true;
+    });
+    return () => sub.remove();
+  }, [tocVisible, findVisible, onRequestCloseToc]);
 
   // 언마운트(화면 이탈·노트 전환) 시 flush
   useEffect(() => {
